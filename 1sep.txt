@@ -3217,3 +3217,4571 @@ The statistical/clustering analysis explains the observed behaviour in the data.
 The second part does not magically prove physical causes. That distinction will make your explanation much more technically correct.
 
 If your guide asks about any exact number in these files, the safest approach is to trace it back to the underlying dataset calculation or model predictions, rather than saying it was a predefined value.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Marine_Engine_PROFESSIONAL.zip
+Zip Archive
+explain me code line by line in detail with why it is used its reasons causes benifts definition and everything , i will be sharing one by one para or functions 
+
+This section is the main orchestration part of your project. It connects the earlier functions together:
+
+Dataset
+   ↓
+Preprocessing
+   ↓
+Train / Validation / Test split
+   ↓
+Scaling
+   ↓
+Train LSTM with sequence lengths 10, 20, 30
+   ↓
+Compare models
+   ↓
+Select best sequence length
+   ↓
+Use selected model for further analysis
+
+There are two pieces here:
+
+generate_fault_class_reference() → creates a clean CSV documenting fault-class information and model results.
+main() → actually runs the complete ML pipeline.
+
+I'll go line by line.
+
+Part 1 — generate_fault_class_reference()
+def generate_fault_class_reference(patterns, contrib_df, selected_seq, acc, mp, mr, mf):
+
+This defines a function that creates a single CSV reference file containing information about:
+
+fault classes
+behavioral patterns
+important/contributing sensors
+selected sequence length
+model performance
+Function parameters
+
+There are seven parameters.
+
+patterns
+
+Likely a DataFrame containing discovered behavioral patterns for some fault classes.
+
+For example:
+
+Fault | Pattern | Samples | Top_Parameters | Pattern_Description
+contrib_df
+
+Another DataFrame containing parameters that differ between normal and faulty conditions.
+
+For example:
+
+Fault | Rank | Sensor | Percent_Change_vs_Normal
+selected_seq
+
+The sequence length selected by your experiment.
+
+For example:
+
+10
+20
+30
+acc
+
+Model accuracy.
+
+mp
+
+Macro precision.
+
+mr
+
+Macro recall.
+
+mf
+
+Macro F1.
+
+So the function receives both fault-analysis information and model-performance information.
+
+Docstring
+"""Generate one clean CSV reference for all fault-class information."""
+
+This is a docstring.
+
+A docstring describes what a function does.
+
+It is useful for:
+
+understanding code
+documentation
+IDE tooltips
+maintenance
+
+This one clearly tells us:
+
+The function generates one CSV containing fault-class information.
+
+Line
+rows = []
+
+Creates an empty list.
+
+The function will build the CSV row-by-row.
+
+Eventually:
+
+rows
+ ↓
+list of dictionaries
+ ↓
+Pandas DataFrame
+ ↓
+CSV
+
+This is a common Pandas pattern.
+
+Fault class summary
+class_info = {
+
+This creates a Python dictionary.
+
+A dictionary stores:
+
+key → value
+
+Here the keys are fault class numbers:
+
+0
+1
+2
+3
+4
+5
+6
+7
+Class 0
+0: ('Normal operating condition', 'Baseline / normal reference', 'Not applicable'),
+
+For class 0, the tuple contains three pieces of information:
+
+Meaning:
+Normal operating condition
+
+Analysis:
+Baseline / normal reference
+
+Physical classification:
+Not applicable
+
+So class 0 represents your normal baseline.
+
+Fault 1
+1: (
+    'Dataset-defined Fault Class 1',
+    '2 behavioural patterns identified',
+    'Physical classification requires mapping from the source dataset documentation'
+),
+
+This is deliberately cautious.
+
+The code does not claim:
+
+Fault 1 physically means a specific mechanical failure.
+
+Instead it says:
+
+Dataset-defined Fault Class 1.
+
+That's an important distinction for research.
+
+Your ML model knows the dataset label, but the label itself does not necessarily tell you the physical engineering meaning unless the original dataset documentation provides that mapping.
+
+Faults 2–7
+
+The same concept applies to:
+
+Fault 2
+Fault 3
+Fault 4
+Fault 5
+Fault 6
+Fault 7
+
+Some have:
+
+behavioural patterns identified
+
+while others say:
+
+Contributing parameters analysed
+
+The important scientific point is:
+
+The code is distinguishing data-derived observations from physically validated fault classifications.
+
+That's good practice.
+
+Loop through all classes
+for fault in range(8):
+
+range(8) produces:
+
+0, 1, 2, 3, 4, 5, 6, 7
+
+So the loop processes all 8 classes.
+
+Retrieve class information
+meaning, analysis, physical = class_info[fault]
+
+Suppose:
+
+fault = 3
+
+Then:
+
+class_info[3]
+
+returns the tuple associated with Fault 3.
+
+Python automatically unpacks it:
+
+meaning
+analysis
+physical
+
+This is called tuple unpacking.
+
+Add a row
+rows.append({
+
+Now the code creates a dictionary representing one CSV row.
+
+'Section': 'Fault Class Summary'
+'Section': 'Fault Class Summary'
+
+This identifies what type of information this row contains.
+
+'Fault': f'Fault {fault}'
+'Fault': f'Fault {fault}'
+
+This uses an f-string.
+
+If:
+
+fault = 3
+
+the result is:
+
+Fault 3
+Empty fields
+'Pattern_or_Rank': '',
+'Samples': '',
+'Parameter': '',
+'Observed_Behaviour_or_Change': '',
+
+These are blank because this particular row is only a class summary.
+
+It doesn't represent an individual sensor or pattern.
+
+Interpretation
+'Interpretation': analysis,
+
+Stores the analysis description from class_info.
+
+Physical classification
+'Physical_Classification_Status': physical
+
+Stores whether a physical mapping is available.
+
+This is useful because it prevents someone reading the CSV from mistakenly interpreting a machine-learning class as a confirmed physical fault type.
+
+Part 2 — Behavioral patterns
+if patterns is not None and not patterns.empty:
+
+This is a safety check.
+
+It asks two questions:
+
+1. Is patterns not None?
+patterns is not None
+
+means:
+
+Does a DataFrame/object actually exist?
+
+2. Is it not empty?
+not patterns.empty
+
+means:
+
+Does it contain rows?
+
+Only if both are true does the code process the patterns.
+
+Why is this useful?
+
+Suppose there are no behavioral patterns.
+
+Without this check, trying to iterate over an invalid/empty object could cause problems.
+
+This makes the function more robust.
+
+Loop
+for _, r in patterns.iterrows():
+
+iterrows() iterates through a Pandas DataFrame row by row.
+
+For example:
+
+patterns
+────────────────────────
+Fault | Pattern | Samples
+1     | 1       | 500
+1     | 2       | 300
+2     | 1       | 400
+
+Each iteration gives one row.
+
+Why _?
+
+The first returned value is the row index.
+
+The code doesn't need it.
+
+Therefore:
+
+_
+
+means:
+
+Ignore the index.
+
+And:
+
+r
+
+represents the current row.
+
+Fault number
+'Fault': f"Fault {int(r['Fault'])}",
+
+Suppose:
+
+r['Fault'] = 2.0
+
+int() converts it to:
+
+2
+
+Then the f-string produces:
+
+Fault 2
+Pattern number
+'Pattern_or_Rank': f"Pattern {int(r['Pattern'])}",
+
+For example:
+
+Pattern = 3
+
+becomes:
+
+Pattern 3
+Samples
+'Samples': int(r['Samples']),
+
+Stores how many observations belong to that pattern.
+
+Parameters
+'Parameter': str(r['Top_Parameters']),
+
+Converts the parameter information to a string.
+
+For example:
+
+Vibration_Z, Oil_Temp
+Behaviour description
+'Observed_Behaviour_or_Change': str(r['Pattern_Description']),
+
+This stores the observed pattern description.
+
+For example:
+
+Elevated vibration with increased exhaust temperature
+Interpretation
+'Interpretation': str(r['Interpretation']),
+
+Stores whatever interpretation was produced by your analysis.
+
+Important scientific distinction
+
+The code then explicitly writes:
+
+'Physical_Classification_Status':
+'Physical classification requires mapping from the source dataset documentation'
+
+This means:
+
+The detected pattern is evidence from the data, but it isn't automatically a verified physical diagnosis.
+
+That's an important distinction in an engineering research project.
+
+Part 3 — Contributing parameters
+if contrib_df is not None and not contrib_df.empty:
+
+Same safety logic.
+
+Only process the DataFrame if:
+
+it exists
+it contains data
+Loop
+for _, r in contrib_df.iterrows():
+
+Again, process each row individually.
+
+Percentage change
+pct = float(r['Percent_Change_vs_Normal'])
+
+Extracts the percentage change and converts it to a floating-point number.
+
+Example:
+
+25.347
+Determine direction
+direction = 'higher' if pct > 0 else 'lower' if pct < 0 else 'similar'
+
+This is a nested conditional expression.
+
+It means:
+
+if pct > 0
+    direction = "higher"
+
+else if pct < 0
+    direction = "lower"
+
+else
+    direction = "similar"
+
+Examples:
+
++20% → higher
+-15% → lower
+0%   → similar
+Add contributing-parameter row
+rows.append({
+
+Again, one dictionary becomes one eventual CSV row.
+
+Fault
+'Fault': f"Fault {int(r['Fault'])}",
+
+Creates the fault label.
+
+Rank
+'Pattern_or_Rank': f"Rank {int(r['Rank'])}",
+
+This time the column doesn't represent a behavioral pattern.
+
+It represents the sensor's rank.
+
+For example:
+
+Rank 1
+Rank 2
+Rank 3
+Sensor
+'Parameter': str(r['Sensor']),
+
+Stores the sensor name.
+
+For example:
+
+Oil_Temp
+Vibration_Z
+Fuel_Flow
+Observed change
+'Observed_Behaviour_or_Change':
+    f"{direction} ({pct:+.3f}% vs normal median)",
+
+This is a nicely formatted description.
+
+Suppose:
+
+direction = "higher"
+pct = 23.45678
+
+Then:
+
+higher (+23.457% vs normal median)
+What does +.3f mean?
+
+This is f-string formatting.
+
++
+
+means show the sign:
+
++23.457
+-12.340
+
+.3f means:
+
+three digits after the decimal point.
+
+So:
+
+23.456789
+
+becomes:
+
++23.457
+Interpretation
+'Interpretation':
+'Descriptive data-derived association; not a proven physical fault subtype or causal root cause.',
+
+This is scientifically important.
+
+The code is explicitly saying:
+
+A statistical difference does not prove causation.
+
+For example:
+
+Fault data:
+Oil temperature is 25% higher
+
+doesn't automatically prove:
+
+High oil temperature caused the fault.
+
+It only establishes an observed association in this dataset.
+
+Part 4 — Model summary
+rows.append({
+    'Section': 'Model Summary',
+
+Now the function adds one final row describing the trained model.
+
+'Fault': 'All classes'
+'Fault': 'All classes',
+
+This row applies to the complete classification problem rather than one individual fault.
+
+Sequence length
+'Parameter': f'Sequence length: {selected_seq} seconds',
+
+Suppose:
+
+selected_seq = 20
+
+Then the output becomes:
+
+Sequence length: 20 seconds
+Important caveat
+
+This is only truly "seconds" if your dataset has one sample per second.
+
+If the sampling interval is different, sequence length represents number of observations, not necessarily seconds.
+
+From your earlier dataset context, the timestamps appear to have approximately one-second spacing, but this should ideally be verified rather than assumed.
+
+Model metrics
+'Observed_Behaviour_or_Change':
+    f'Accuracy {acc:.6f}; Macro Precision {mp:.6f}; Macro Recall {mr:.6f}; Macro F1 {mf:.6f}',
+
+This stores all four metrics in one field.
+
+Example:
+
+Accuracy 0.851800;
+Macro Precision 0.825500;
+Macro Recall 0.705500;
+Macro F1 0.739800
+Interpretation
+'Interpretation':
+'LSTM learns relationships between sensor sequences and supplied dataset labels.',
+
+This is a concise description of what the model is actually learning.
+
+It does not claim the LSTM has learned the true physical mechanism of each fault.
+
+It learns statistical relationships between:
+
+sensor sequences
+        ↓
+dataset labels
+Save path
+csv_path = os.path.join(OUT, 'FAULT_CLASS_REFERENCE.csv')
+
+This creates the full output path.
+
+So the resulting file will be:
+
+outputs/
+└── FAULT_CLASS_REFERENCE.csv
+Convert rows to DataFrame
+pd.DataFrame(rows)
+
+Your rows list contains dictionaries.
+
+Pandas converts them into a table.
+
+Conceptually:
+
+rows
+ ↓
+DataFrame
+ ↓
+Section | Fault | Parameter | Interpretation | ...
+Write CSV
+.to_csv(csv_path, index=False)
+
+Saves the DataFrame to CSV.
+
+Why index=False?
+
+Pandas normally adds its own row number:
+
+0
+1
+2
+3
+
+But you don't need that extra column.
+
+So:
+
+index=False
+
+prevents Pandas from writing its index.
+
+Print confirmation
+print('Clean fault reference created:', csv_path)
+
+This simply tells you where the file was created.
+
+Now main()
+def main():
+
+This is the main function controlling the complete pipeline.
+
+Think of it as the manager of your project.
+
+It calls the other functions in the correct order.
+
+Step 1 — Reset generated directories
+reset_generated_dirs()
+
+Before doing anything else, the program clears old generated results.
+
+So every run starts from a clean output state.
+
+Step 2 — Load dataset
+df = pd.read_csv(DATA)
+
+Pandas reads the CSV file into a DataFrame.
+
+DATA was defined earlier:
+
+data/marine_engine_fault_dataset.csv
+
+So:
+
+CSV
+ ↓
+Pandas
+ ↓
+df
+⚠️ Important issue in this code
+
+Immediately after reading the file, you have:
+
+if not os.path.exists(DATA):
+    raise FileNotFoundError(...)
+
+This check is in the wrong order.
+
+The code currently does:
+
+df = pd.read_csv(DATA)
+
+if not os.path.exists(DATA):
+    ...
+
+If the dataset doesn't exist, pd.read_csv(DATA) will already fail before your custom FileNotFoundError is reached.
+
+A better order is:
+
+if not os.path.exists(DATA):
+    raise FileNotFoundError(f'Dataset not found: {DATA}')
+
+df = pd.read_csv(DATA)
+
+This gives you a cleaner and more intentional error message.
+
+Step 3 — Timestamp conversion
+df['Timestamp'] = pd.to_datetime(df['Timestamp'])
+
+The Timestamp column is converted into Pandas datetime values.
+
+Why?
+
+Because strings like:
+
+2024-01-01 00:00:01
+
+are not as useful for time-based operations as actual datetime objects.
+
+After conversion, Pandas understands:
+
+date
+time
+ordering
+time differences
+temporal operations
+Step 4 — Check required columns
+missing = [c for c in SENSORS + ['Fault_Label'] if c not in df.columns]
+
+This creates a list of required columns that aren't present in the dataset.
+
+Let's break it down.
+
+SENSORS + ['Fault_Label']
+
+Your sensor list contains 18 columns.
+
+Then:
+
+['Fault_Label']
+
+adds the required target column.
+
+So the code is checking for:
+
+18 sensors + Fault_Label
+for c in ...
+
+For each required column:
+
+if c not in df.columns
+
+checks whether that column exists.
+
+If Fault_Label is missing, for example:
+
+missing = ['Fault_Label']
+Step 5
+if missing:
+
+An empty list evaluates as false.
+
+A non-empty list evaluates as true.
+
+So this means:
+
+If any required columns are missing...
+
+Step 6
+raise ValueError(f'Missing required columns: {missing}')
+
+Stop execution and report the missing columns.
+
+For example:
+
+ValueError:
+Missing required columns: ['Vibration_Z', 'Fault_Label']
+
+This is much better than letting the program fail later with a confusing KeyError.
+
+Step 7 — Sort chronologically
+df = df.sort_values('Timestamp').reset_index(drop=True)
+
+This does two things.
+
+First:
+sort_values('Timestamp')
+
+sorts the dataset from earliest timestamp to latest.
+
+This is critical for time-series modelling.
+
+Your LSTM assumes temporal order.
+
+You don't want:
+
+t5
+t1
+t4
+t2
+t3
+
+You want:
+
+t1
+t2
+t3
+t4
+t5
+reset_index(drop=True)
+
+After sorting, the original DataFrame indices may be something like:
+
+5
+2
+8
+1
+...
+
+reset_index() creates a clean index:
+
+0
+1
+2
+3
+...
+Why drop=True?
+
+Without drop=True, Pandas would preserve the old index as a new column.
+
+You don't need that.
+
+Step 8 — Extract labels
+y = df['Fault_Label'].astype(int).to_numpy()
+
+Three operations happen.
+
+df['Fault_Label']
+
+Select the target column.
+
+.astype(int)
+
+Convert labels to integers.
+
+Example:
+
+"0" → 0
+"1" → 1
+.to_numpy()
+
+Convert the Pandas Series to a NumPy array.
+
+So:
+
+CSV label column
+      ↓
+Pandas Series
+      ↓
+integer values
+      ↓
+NumPy array
+Step 9 — Extract timestamps
+ts = df['Timestamp'].astype(str).to_numpy()
+
+The timestamps are converted to strings and then NumPy array.
+
+This is useful because later your analysis/output files can easily store them.
+
+Step 10 — Extract sensors
+X = df[SENSORS].astype(float).to_numpy()
+
+This is your feature matrix.
+
+It:
+
+selects the 18 sensors
+converts them to floating-point values
+converts the DataFrame into a NumPy array
+
+If you have 10,000 rows:
+
+X.shape = (10000, 18)
+Step 11 — Dataset size
+n = len(df)
+
+Stores the number of rows.
+
+If your dataset contains 10,000 observations:
+
+n = 10000
+Step 12 — Training boundary
+tr_end = int(n * 0.70)
+
+70% of the data is used for training.
+
+For 10,000 rows:
+
+$$ 10000\times0.70=7000 $$
+
+Therefore:
+
+tr_end = 7000
+Step 13 — Validation boundary
+va_end = int(n * 0.85)
+
+85% of the data.
+
+For 10,000 rows:
+
+$$ 10000\times0.85=8500 $$
+
+So:
+
+Training   → 0–6999
+Validation → 7000–8499
+Test       → 8500–9999
+
+That means:
+
+70% → training
+15% → validation
+15% → test
+Why chronological splitting?
+
+For time-series data, this is important.
+
+You want to simulate:
+
+Past data
+   ↓
+Training
+   ↓
+Validation
+   ↓
+Future unseen data
+   ↓
+Testing
+
+This is closer to the real-world scenario where you train on historical engine data and then make predictions on future observations.
+
+Step 14 — Fit scaler
+scaler = StandardScaler().fit(X[:tr_end])
+
+This is a very important correct practice.
+
+The scaler is fitted only on training data.
+
+It learns:
+
+mean
+standard deviation
+
+for each sensor using only the training region.
+
+Why not fit on the entire dataset?
+
+Because validation and test data are supposed to simulate unseen data.
+
+If you calculate the scaling parameters using the entire dataset, information from the test period can leak into preprocessing.
+
+That is called:
+
+data leakage
+
+Your code avoids that here.
+
+Step 15 — Transform all data
+Xs = scaler.transform(X)
+
+Now the previously learned training statistics are applied to all observations.
+
+So:
+
+Training statistics
+        ↓
+Training data → scaled
+Validation    → scaled
+Test          → scaled
+
+The validation/test data is transformed using the training scaler, not its own statistics.
+
+That is correct.
+
+Sequence-length experiment
+sequence_rows = []
+candidates = {}
+
+Two structures are created.
+
+sequence_rows
+
+This will store performance information for:
+
+10
+20
+30
+
+For example:
+
+Sequence | Validation F1 | Test Accuracy | Test F1
+10       | 0.71           | 0.84          | 0.72
+20       | 0.74           | 0.85          | 0.74
+30       | 0.70           | 0.83          | 0.69
+candidates
+
+This dictionary stores the actual model/results associated with each sequence length.
+
+Conceptually:
+
+10 → model + results
+20 → model + results
+30 → model + results
+
+This allows you to select the best model later.
+
+Loop through sequence lengths
+for seq_len in SEQ_LENGTHS:
+
+Recall:
+
+SEQ_LENGTHS = [10, 20, 30]
+
+So the loop runs three experiments.
+
+Print separator
+print('\n' + '=' * 72)
+
+This creates a visual separator in the console.
+
+'=' * 72 means:
+
+================================================================
+
+The \n adds a new line.
+
+Print sequence length
+print(f'SEQUENCE LENGTH = {seq_len} seconds')
+
+If:
+
+seq_len = 20
+
+it prints:
+
+SEQUENCE LENGTH = 20 seconds
+
+Again, this assumes one observation corresponds to one second.
+
+Train model
+model, history, val_f1, test_acc, test_f1, Xte, yte, tte, test_prob = train_one(
+    seq_len, Xs, y, ts, tr_end, va_end
+)
+
+This calls the train_one() function we just discussed.
+
+So the entire process for each sequence length is:
+
+seq_len = 10
+     ↓
+make train/val/test sequences
+     ↓
+build LSTM
+     ↓
+train
+     ↓
+predict
+     ↓
+calculate metrics
+
+Then it repeats for 20 and 30.
+
+Store results
+sequence_rows.append({
+
+A dictionary is created containing metrics.
+
+Sequence length
+'Sequence_Length': seq_len,
+
+Stores whether this experiment used:
+
+10 / 20 / 30
+Validation macro F1
+'Validation_Macro_F1': val_f1,
+
+This is particularly important because it will later determine which sequence length is selected.
+
+Test accuracy
+'Test_Accuracy': test_acc,
+
+Stores test accuracy.
+
+Test macro F1
+'Test_Macro_F1': test_f1,
+
+Stores test macro F1.
+
+Epochs trained
+'Epochs_Trained': len(history.history.get('loss', []))
+
+This tells you how many epochs actually ran.
+
+Why might it be less than 40?
+
+Because of:
+
+EarlyStopping
+
+For example:
+
+Maximum = 40 epochs
+Actual = 23 epochs
+
+The model stopped early.
+
+Store candidate
+candidates[seq_len] = (
+    model, history, Xte, yte, tte, test_prob
+)
+
+The dictionary key is the sequence length.
+
+For example:
+
+candidates[10]
+candidates[20]
+candidates[30]
+
+Each contains the corresponding model and outputs.
+
+This is important because after comparing the experiments, the code needs the actual model corresponding to the selected sequence length.
+
+Print metrics
+print(f'Validation Macro F1: {val_f1:.6f}')
+print(f'Test Accuracy: {test_acc:.6f}')
+print(f'Test Macro F1: {test_f1:.6f}')
+
+.6f means:
+
+Show six digits after the decimal point.
+
+For example:
+
+0.739800
+
+rather than:
+
+0.7398
+
+This makes experiment logs consistent.
+
+Convert experiment results into DataFrame
+seq_table = pd.DataFrame(sequence_rows)
+
+Now the list of dictionaries becomes a table.
+
+Example:
+
+Sequence	Validation F1	Test Accuracy	Test F1	Epochs
+10	0.72	0.83	0.71	18
+20	0.75	0.85	0.74	25
+30	0.70	0.82	0.69	15
+Save experiment comparison
+seq_table.to_csv(
+    os.path.join(ANALYSIS, 'sequence_length_comparison.csv'),
+    index=False
+)
+
+This creates:
+
+analysis_outputs/
+└── sequence_length_comparison.csv
+
+This is useful for research documentation because you have a permanent record of the sequence-length experiment.
+
+Select best sequence length
+selected_seq = int(
+    seq_table.loc[
+        seq_table['Validation_Macro_F1'].idxmax(),
+        'Sequence_Length'
+    ]
+)
+
+This looks complicated, so let's break it down.
+
+seq_table['Validation_Macro_F1']
+
+Selects the validation F1 column.
+
+For example:
+
+0.72
+0.75
+0.70
+.idxmax()
+
+Finds the row index containing the largest value.
+
+Here:
+
+0.75
+
+is the maximum.
+
+So it returns the corresponding row index.
+
+.loc[...]
+
+Selects that row.
+
+Then:
+
+'Sequence_Length'
+
+selects the sequence length from that row.
+
+So the result could be:
+
+20
+int(...)
+
+Converts it into a normal integer.
+
+Therefore:
+
+selected_seq = 20
+Why use validation F1 to select the sequence?
+
+This is an important methodological decision.
+
+The code does:
+
+10 sec → validation F1
+20 sec → validation F1
+30 sec → validation F1
+                     ↓
+              highest validation F1
+                     ↓
+             selected sequence
+
+It does not select using test performance.
+
+That's good experimental practice because the test set should ideally remain a final held-out evaluation set.
+
+If you choose the model based on test performance, you're effectively using the test set for model selection, which weakens the independence of the final test evaluation.
+
+Retrieve the selected candidate
+model, history, Xte, yte, tte, test_prob = candidates[selected_seq]
+
+Suppose:
+
+selected_seq = 20
+
+Then this gets:
+
+candidates[20]
+
+and retrieves the model and associated test outputs from the 20-step experiment.
+
+Generate final predictions
+pred = test_prob.argmax(axis=1)
+
+Again, test_prob contains 8 probabilities per sample.
+
+argmax(axis=1) selects the class with the highest probability.
+
+Example:
+
+[0.05, 0.03, 0.80, 0.02, ...]
+
+becomes:
+
+2
+Confidence
+conf = test_prob.max(axis=1)
+
+This extracts the largest probability for each test sample.
+
+For example:
+
+test_prob:
+
+[0.05, 0.03, 0.80, ...]
+
+then:
+
+conf = 0.80
+
+So conf represents the model's highest class probability for each prediction.
+
+Important distinction about confidence
+
+This is a softmax score, not necessarily a calibrated probability.
+
+For example:
+
+confidence = 0.95
+
+does not automatically mean:
+
+"The model is objectively 95% certain."
+
+Neural-network softmax outputs can be poorly calibrated.
+
+So in a research report, it's safer to call this something like:
+
+maximum softmax probability
+
+unless you have performed probability calibration.
+
+Final console output
+print('\n' + '=' * 72)
+print(f'SELECTED SEQUENCE LENGTH: {selected_seq} seconds')
+print('=' * 72)
+
+This prints the final selected sequence length.
+
+For example:
+
+========================================================================
+SELECTED SEQUENCE LENGTH: 20 seconds
+========================================================================
+Overall execution flow of this entire section
+
+Your program has now reached this architecture:
+
+                    CSV DATASET
+                         │
+                         ▼
+                 Load with Pandas
+                         │
+                         ▼
+               Validate columns
+                         │
+                         ▼
+               Sort by Timestamp
+                         │
+                         ▼
+          ┌──────────────┴──────────────┐
+          │                             │
+          ▼                             ▼
+     Sensor data                    Fault labels
+          │                             │
+          ▼                             │
+    StandardScaler                     │
+          │                             │
+          └──────────────┬──────────────┘
+                         ▼
+                 Chronological split
+                         │
+             ┌───────────┼───────────┐
+             ▼           ▼           ▼
+           70%          15%         15%
+          Train       Validation     Test
+             │           │           │
+             └───────────┼───────────┘
+                         │
+          ┌──────────────┼──────────────┐
+          ▼              ▼              ▼
+       Seq = 10       Seq = 20       Seq = 30
+          │              │              │
+          ▼              ▼              ▼
+       LSTM model     LSTM model     LSTM model
+          │              │              │
+          ▼              ▼              ▼
+       Validation F1  Validation F1  Validation F1
+          │              │              │
+          └──────────────┼──────────────┘
+                         ▼
+                 Highest Val Macro F1
+                         │
+                         ▼
+                  Selected Sequence
+                         │
+                         ▼
+                Final Test Predictions
+One important issue to notice in your code
+
+There is a potentially important methodological point in:
+
+'Sequence_Length': seq_len
+
+and:
+
+f'Sequence length: {selected_seq} seconds'
+
+Your code calls 10, 20, and 30 seconds, but technically make_sequences() operates on 10, 20, or 30 observations.
+
+They are equivalent to seconds only if your data is sampled once per second.
+
+For your dataset, you've previously worked with timestamps that appear to progress approximately one second at a time, but for a rigorous research paper I'd explicitly verify the sampling interval before stating "10 seconds."
+
+Another important point: model selection
+
+Your selection logic is:
+
+selected_seq =
+    sequence length with highest validation Macro F1
+
+That means:
+
+Validation data → model selection
+Test data → final evaluation
+
+This is a sound general structure.
+
+However, if you repeatedly inspect test results and then change the pipeline based on them, the test set gradually becomes part of model development. So ideally, once you finalize the pipeline, report the test results only once as the final held-out evaluation.
+
+The role of the three functions you've now shown
+
+You can explain this section in your project presentation as:
+
+build_model() defines the LSTM-based multiclass classifier, train_one() performs sequence generation, training, validation, and test evaluation for a given sequence length, and sensor_profile() provides descriptive statistical analysis of sensor differences between normal and fault conditions. The main() function orchestrates the complete pipeline, evaluates sequence lengths of 10, 20, and 30 observations, and selects the sequence length with the highest validation macro-F1 score.
+
+That is the research-level explanation.
+
+At the code level, the most important chain to understand is:
+
+18 sensors
+   ↓
+StandardScaler
+   ↓
+Sliding windows
+   ↓
+(seq_len, 18)
+   ↓
+LSTM(64)
+   ↓
+Dropout
+   ↓
+32-dimensional embedding
+   ↓
+8-class Softmax
+   ↓
+Normal / Fault 1–7
+
+And the experiment is specifically asking:
+
+"How much historical sensor information should the LSTM see at once — 10, 20, or 30 observations?"
+
+# ------------------------------------------------------------
+    # 2. Save model + training information
+    # ------------------------------------------------------------
+    model.save(os.path.join(MODEL_DIR, 'final_lstm_model.keras'))
+    pd.DataFrame(history.history).to_csv(os.path.join(ANALYSIS, 'training_history.csv'), index=False)
+    with open(os.path.join(ANALYSIS, 'pipeline_config.json'), 'w', encoding='utf-8') as f:
+        json.dump({
+            'sequence_lengths_tested': SEQ_LENGTHS,
+            'selected_sequence_length': selected_seq,
+            'sensors': SENSORS,
+            'classes': 8,
+            'manual_signatures': False,
+            'class_weights': False,
+            'split': 'chronological 70/15/15',
+            'random_state': RANDOM_STATE
+        }, f, indent=2)
+
+    # ------------------------------------------------------------
+    # 3. Final classification results
+    # ------------------------------------------------------------
+    acc = accuracy_score(yte, pred)
+    mp, mr, mf, _ = precision_recall_fscore_support(
+        yte, pred, labels=list(range(8)), average='macro', zero_division=0
+    )
+
+    report = pd.DataFrame(classification_report(
+        yte, pred, labels=list(range(8)), target_names=LABEL_NAMES,
+        output_dict=True, zero_division=0
+    )).T
+    report.to_csv(os.path.join(OUT, 'classification_report.csv'))
+
+    cm = pd.DataFrame(
+        confusion_matrix(yte, pred, labels=list(range(8))),
+        index=[f'Actual_{i}' for i in range(8)],
+        columns=[f'Pred_{i}' for i in range(8)]
+    )
+    cm.to_csv(os.path.join(OUT, 'confusion_matrix.csv'))
+
+    pred_df = pd.DataFrame({
+        'Timestamp': tte,
+        'Actual_Label': yte,
+        'Predicted_Label': pred,
+        'Confidence': conf
+    })
+    pred_df.to_csv(os.path.join(ANALYSIS, 'test_predictions.csv'), index=False)
+
+    # ------------------------------------------------------------
+    # 4. Extract learned 32-D LSTM representation
+    # ------------------------------------------------------------
+    # Keras 3 Sequential models may not expose .input until explicitly called.
+    # The model is already built through Input(), but we explicitly call it once
+    # to make the graph/node available across Keras/TensorFlow versions.
+    _ = model(Xte[:1], training=False)
+    embed = Model(inputs=model.inputs, outputs=model.get_layer('embedding').output)
+    emb = embed.predict(Xte, verbose=0)
+    emb_df = pd.DataFrame(emb, columns=[f'LSTM_Feature_{i+1}' for i in range(32)])
+    emb_df['Timestamp'] = tte
+    emb_df['Actual_Label'] = yte
+    emb_df['Predicted_Label'] = pred
+    emb_df.to_csv(os.path.join(ANALYSIS, 'lstm_embeddings.csv'), index=False)
+
+    # ------------------------------------------------------------
+    # 5. Validated pattern discovery: only Faults 1-3
+    # ------------------------------------------------------------
+    raw_test = df.iloc[va_end:].copy().reset_index(drop=True)
+    raw_test['Timestamp'] = raw_test['Timestamp'].astype(str)
+    merged = emb_df.merge(raw_test, on=['Timestamp'], how='inner', suffixes=('', '_raw'))
+    # The raw dataset uses Fault_Label, while the embedding table uses Actual_Label.
+    # Keep the LSTM/evaluation label as the canonical label for downstream analysis.
+    if 'Fault_Label' in merged.columns:
+        merged['Actual_Label'] = merged['Actual_Label'].astype(int)
+    elif 'Actual_Label_raw' in merged.columns:
+        merged['Actual_Label'] = merged['Actual_Label'].astype(int)
+
+    pattern_rows = []
+    assign_rows = []
+    sensor_rows = []
+    validated_k = {1: 2, 2: 3, 3: 2}
+    normal = merged[merged['Actual_Label'] == 0]
+
+    for fault, k in validated_k.items():
+        sub = merged[merged['Actual_Label'] == fault].copy()
+        if len(sub) < k:
+            continue
+        Z = sub[[f'LSTM_Feature_{i+1}' for i in range(32)]].to_numpy()
+        km = KMeans(n_clusters=k, random_state=RANDOM_STATE, n_init=20).fit(Z)
+        sil = silhouette_score(Z, km.labels_) if len(np.unique(km.labels_)) > 1 else np.nan
+        sub['Pattern'] = km.labels_ + 1
+
+        for _, row in sub[['Timestamp', 'Actual_Label', 'Predicted_Label', 'Pattern']].iterrows():
+            assign_rows.append(row.to_dict())
+
+        for cluster_id in range(1, k + 1):
+            cluster = sub[sub['Pattern'] == cluster_id]
+            top = sensor_profile(cluster, normal, top_n=5)
+            desc = '; '.join(
+                f'{s} ({"higher" if pct > 0 else "lower" if pct < 0 else "similar"}, {pct:+.1f}%)'
+                for s, _, _, pct in top
+            )
+            pattern_rows.append({
+                'Fault': fault,
+                'Pattern': cluster_id,
+                'Samples': len(cluster),
+                'Silhouette': sil,
+                'Top_Parameters': ', '.join(x[0] for x in top),
+                'Pattern_Description': desc,
+                'Interpretation': 'Descriptive LSTM-representation behavioural pattern; not a proven physical fault subtype or causal root cause.'
+            })
+            for sensor in SENSORS:
+                nm = float(normal[sensor].median())
+                cm = float(cluster[sensor].median())
+                pct = ((cm - nm) / nm * 100) if nm != 0 else np.nan
+                sensor_rows.append({
+                    'Fault': fault,
+                    'Pattern': cluster_id,
+                    'Sensor': sensor,
+                    'Normal_Median': nm,
+                    'Pattern_Median': cm,
+                    'Percent_Change_vs_Normal': pct
+                })
+
+    patterns = pd.DataFrame(pattern_rows)
+    patterns.to_csv(os.path.join(OUT, 'discovered_patterns.csv'), index=False)
+    pd.DataFrame(assign_rows).to_csv(os.path.join(ANALYSIS, 'pattern_cluster_assignments.csv'), index=False)
+    pd.DataFrame(sensor_rows).to_csv(os.path.join(ANALYSIS, 'pattern_sensor_statistics.csv'), index=False)
+
+Yes. This part is very important because it moves from training the LSTM to saving the trained model, evaluating it, extracting learned features, and discovering behavioural patterns inside Fault 1–3.
+
+The overall flow is:
+
+Selected LSTM
+     ↓
+Save model + training information
+     ↓
+Calculate final classification metrics
+     ↓
+Create classification report + confusion matrix
+     ↓
+Extract 32-dimensional LSTM embeddings
+     ↓
+Combine embeddings with raw sensor data
+     ↓
+For Fault 1, 2, 3:
+     ↓
+K-Means clustering in learned 32-D feature space
+     ↓
+Discover behavioural patterns
+     ↓
+Compare each pattern's sensors with normal operation
+     ↓
+Save pattern + sensor statistics
+2. Save model + training information
+model.save(os.path.join(MODEL_DIR, 'final_lstm_model.keras'))
+What does this do?
+
+It saves the trained LSTM model to a .keras file.
+
+The resulting file will be:
+
+model/
+└── final_lstm_model.keras
+Breaking it down
+os.path.join(MODEL_DIR, 'final_lstm_model.keras')
+
+creates the path:
+
+MODEL_DIR/final_lstm_model.keras
+
+Then:
+
+model.save(...)
+
+stores the trained neural network.
+
+This includes the model architecture and learned weights, and Keras can reload it later.
+
+Why save the model?
+
+Because you don't want to train the LSTM every time new engine data arrives.
+
+For example:
+
+Training phase
+CSV → preprocessing → LSTM training → final_lstm_model.keras
+
+Then later:
+
+LIVE ENGINE DATA
+      ↓
+same preprocessing
+      ↓
+trained LSTM
+      ↓
+Fault prediction
+
+This is particularly important for your real-time marine-engine monitoring idea.
+
+You train the model offline and then use the saved model for inference.
+
+2.1 Save training history
+pd.DataFrame(history.history).to_csv(
+    os.path.join(ANALYSIS, 'training_history.csv'),
+    index=False
+)
+
+Remember this from train_one():
+
+history = model.fit(...)
+
+history contains the training progress.
+
+For example:
+
+epoch    loss    accuracy    val_loss    val_accuracy
+1        1.72    0.35        1.65        0.39
+2        1.42    0.48        1.37        0.50
+3        1.15    0.61        1.18        0.59
+...
+
+Actually, history.history is a Python dictionary similar to:
+
+{
+    'loss': [...],
+    'accuracy': [...],
+    'val_loss': [...],
+    'val_accuracy': [...]
+}
+
+Then:
+
+pd.DataFrame(history.history)
+
+converts it into a table.
+
+Finally:
+
+.to_csv(...)
+
+saves it.
+
+Why is this useful?
+
+You can later analyze:
+
+whether the model learned
+whether training loss decreased
+whether validation loss decreased
+whether overfitting occurred
+when EarlyStopping happened
+whether validation accuracy stopped improving
+
+For research, this is useful evidence of the training process.
+
+2.2 Save pipeline configuration
+with open(
+    os.path.join(ANALYSIS, 'pipeline_config.json'),
+    'w',
+    encoding='utf-8'
+) as f:
+
+This opens/creates:
+
+analysis_outputs/pipeline_config.json
+Why JSON?
+
+JSON is a convenient format for storing structured configuration information.
+
+For example:
+
+{
+    "sequence_lengths_tested": [10, 20, 30],
+    "selected_sequence_length": 20,
+    "sensors": [...],
+    "classes": 8
+}
+
+It makes the experiment reproducible and easier to inspect later.
+
+Then:
+
+json.dump({
+
+writes a Python dictionary into JSON.
+
+sequence_lengths_tested
+'sequence_lengths_tested': SEQ_LENGTHS,
+
+From earlier:
+
+SEQ_LENGTHS = [10, 20, 30]
+
+So the JSON records:
+
+"sequence_lengths_tested": [10, 20, 30]
+
+Meaning:
+
+The experiment tested three temporal observation-window lengths.
+
+Remember the earlier caveat: these are technically numbers of observations. Calling them seconds assumes approximately 1 sample/second.
+
+Selected sequence length
+'selected_sequence_length': selected_seq,
+
+This records which sequence length achieved the highest validation Macro F1.
+
+For example:
+
+"selected_sequence_length": 20
+
+means the 20-observation sequence was selected.
+
+Sensors
+'sensors': SENSORS,
+
+Stores the 18 input parameters.
+
+This is useful because someone examining the experiment later can immediately know what the model used.
+
+Number of classes
+'classes': 8,
+
+Your classification problem contains:
+
+0 → Normal
+1 → Fault 1
+2 → Fault 2
+3 → Fault 3
+4 → Fault 4
+5 → Fault 5
+6 → Fault 6
+7 → Fault 7
+
+Therefore:
+
+8 classes
+Manual signatures
+'manual_signatures': False,
+
+This is an important research statement.
+
+It means the model wasn't given manually designed rules such as:
+
+IF Oil_Temp > threshold
+AND Oil_Pressure < threshold
+THEN Fault X
+
+Instead, the LSTM learns patterns from the training data.
+
+So:
+
+Manual rule-based detection
+        ❌
+
+Data-driven learning
+        ✅
+Class weights
+'class_weights': False,
+
+This records that class weighting wasn't used during training.
+
+For example, class weighting could have been:
+
+class_weights = {
+    0: 1.0,
+    1: 2.0,
+    2: 3.0
+}
+
+to give more importance to underrepresented classes.
+
+Your current pipeline doesn't do that.
+
+This is important to document because class imbalance can affect Macro F1.
+
+Train/validation/test split
+'split': 'chronological 70/15/15',
+
+This documents:
+
+70% → Training
+15% → Validation
+15% → Test
+
+and, importantly, the split is chronological.
+
+For time-series engine data:
+
+Earlier data ───────────────→ Later data
+
+|---- TRAIN ----|-- VAL --|-- TEST --|
+      70%          15%       15%
+
+This is generally more realistic than randomly shuffling temporal data.
+
+Random state
+'random_state': RANDOM_STATE
+
+Earlier:
+
+RANDOM_STATE = 42
+
+So the JSON records:
+
+"random_state": 42
+
+This helps reproduce operations such as K-Means initialization.
+
+indent=2
+}, f, indent=2)
+
+makes the JSON human-readable.
+
+Without indentation:
+
+{"classes":8,"random_state":42,...}
+
+With indentation:
+
+{
+  "classes": 8,
+  "random_state": 42
+}
+
+Much easier to inspect.
+
+3. Final classification results
+
+Now the code evaluates the selected model on the test set.
+
+acc = accuracy_score(yte, pred)
+
+This calculates test accuracy.
+
+Formula
+$$ Accuracy = \frac{\text{Correct Predictions}} {\text{Total Predictions}} $$
+
+For example:
+
+1000 test samples
+850 correctly classified
+
+then:
+
+$$ Accuracy = \frac{850}{1000}=0.85 $$
+
+or:
+
+85%
+Macro Precision, Recall and F1
+mp, mr, mf, _ = precision_recall_fscore_support(
+    yte,
+    pred,
+    labels=list(range(8)),
+    average='macro',
+    zero_division=0
+)
+
+This calculates:
+
+Macro Precision
+Macro Recall
+Macro F1
+
+for all 8 classes.
+
+yte
+yte
+
+contains the actual labels.
+
+Example:
+
+[0, 0, 1, 2, 2, 3, ...]
+pred
+pred
+
+contains the model's predictions.
+
+Example:
+
+[0, 0, 1, 1, 2, 3, ...]
+labels=list(range(8))
+list(range(8))
+
+produces:
+
+[0, 1, 2, 3, 4, 5, 6, 7]
+
+This explicitly tells sklearn to evaluate all 8 classes.
+
+average='macro'
+
+This is very important.
+
+Macro averaging calculates the metric independently for every class and then takes the average.
+
+For example:
+
+Normal       F1 = 0.95
+Fault 1      F1 = 0.80
+Fault 2      F1 = 0.70
+Fault 3      F1 = 0.60
+...
+
+Then:
+
+$$ MacroF1 = \frac{F1_0+F1_1+\cdots+F1_7}{8} $$
+Why is Macro F1 useful here?
+
+Because if one fault class has many samples and another has very few, accuracy can hide poor performance on the smaller class.
+
+Macro F1 gives each class equal importance.
+
+For a multi-fault diagnostic system, this is particularly informative.
+
+zero_division=0
+
+Suppose the model never predicts Fault 7.
+
+Then precision/recall calculations can encounter division by zero.
+
+Instead of producing a warning/error:
+
+zero_division=0
+
+tells sklearn to use 0.
+
+3.1 Classification report
+report = pd.DataFrame(classification_report(
+    yte,
+    pred,
+    labels=list(range(8)),
+    target_names=LABEL_NAMES,
+    output_dict=True,
+    zero_division=0
+)).T
+
+This generates a detailed report for each class.
+
+Because:
+
+output_dict=True
+
+the result comes back as a Python dictionary rather than formatted text.
+
+Then:
+
+pd.DataFrame(...)
+
+turns it into a DataFrame.
+
+Finally:
+
+.T
+
+means transpose.
+
+Instead of:
+
+metric      Normal Fault1 ...
+precision
+recall
+f1
+support
+
+you get something like:
+
+class	precision	recall	f1-score	support
+Normal	...	...	...	...
+Fault 1	...	...	...	...
+Fault 2	...	...	...	...
+
+This is much easier to save and analyze.
+
+Then:
+
+report.to_csv(
+    os.path.join(OUT, 'classification_report.csv')
+)
+
+creates:
+
+outputs/
+└── classification_report.csv
+
+This becomes one of your main evaluation files.
+
+3.2 Confusion matrix
+cm = pd.DataFrame(
+    confusion_matrix(
+        yte,
+        pred,
+        labels=list(range(8))
+    ),
+
+A confusion matrix tells you which classes are being confused with which other classes.
+
+Suppose:
+
+Actual Fault 2
+Predicted Fault 3
+
+That contributes to:
+
+row = Fault 2
+column = Fault 3
+
+You then create row labels:
+
+index=[f'Actual_{i}' for i in range(8)]
+
+which produces:
+
+Actual_0
+Actual_1
+Actual_2
+...
+Actual_7
+
+And columns:
+
+columns=[f'Pred_{i}' for i in range(8)]
+
+produces:
+
+Pred_0
+Pred_1
+...
+Pred_7
+
+So the matrix conceptually looks like:
+
+	Pred 0	Pred 1	Pred 2	...
+Actual 0	✓			
+Actual 1		✓		
+Actual 2			✓	
+Actual 3				✓
+
+The diagonal:
+
+Actual 0 → Pred 0
+Actual 1 → Pred 1
+Actual 2 → Pred 2
+...
+
+represents correct predictions.
+
+Off-diagonal values represent mistakes.
+
+Then:
+
+cm.to_csv(
+    os.path.join(OUT, 'confusion_matrix.csv')
+)
+
+saves:
+
+outputs/confusion_matrix.csv
+3.3 Save individual test predictions
+pred_df = pd.DataFrame({
+    'Timestamp': tte,
+    'Actual_Label': yte,
+    'Predicted_Label': pred,
+    'Confidence': conf
+})
+
+This is extremely useful for time-series analysis.
+
+Each test sequence gets a record.
+
+For example:
+
+Timestamp	Actual	Predicted	Confidence
+02:20:10	0	0	0.97
+02:20:11	1	1	0.89
+02:20:12	2	3	0.61
+
+You can therefore answer:
+
+At what time did the model detect a particular fault?
+
+Then:
+
+pred_df.to_csv(
+    os.path.join(ANALYSIS, 'test_predictions.csv'),
+    index=False
+)
+
+creates:
+
+analysis_outputs/test_predictions.csv
+
+This can later be used for:
+
+temporal fault analysis
+fault-event detection
+plotting engine status over time
+investigating misclassified timestamps
+real-time monitoring logic
+Important note about Confidence
+
+Earlier:
+
+conf = test_prob.max(axis=1)
+
+This is the highest softmax probability.
+
+It is useful as a model certainty indicator, but it is not automatically a statistically calibrated probability.
+
+For example:
+
+Fault 3 = 0.92
+
+doesn't necessarily mean:
+
+"There is exactly a 92% probability the engine has Fault 3."
+
+It means the model's highest softmax output was 0.92.
+
+4. Extract learned 32-D LSTM representation
+
+This is one of the most interesting sections.
+
+Your model is:
+
+18 sensor values
+       ↓
+     LSTM 64
+       ↓
+   Dropout
+       ↓
+ Dense 32
+       ↓
+  Softmax 8
+
+The Dense layer:
+
+Dense(32, activation='relu', name='embedding')
+
+produces a 32-dimensional learned representation.
+
+Instead of only asking:
+
+Which fault is this?
+
+we can ask:
+
+What characteristics did the LSTM learn about this engine sequence?
+
+Why embeddings?
+
+Suppose the original sequence contains:
+
+20 timestamps × 18 sensors
+
+That's:
+
+$$ 20 \times 18 = 360 $$
+
+values.
+
+The LSTM processes these 360 values and learns temporal relationships.
+
+The embedding layer compresses the learned information into:
+
+32 numbers
+
+For one sequence:
+
+[0.21, 0.00, 1.38, 0.47, ..., 0.92]
+
+These 32 numbers form its learned representation.
+
+This line
+_ = model(Xte[:1], training=False)
+
+takes the first test sequence and passes it through the model.
+
+Why?
+
+The comment explains:
+
+# Keras 3 Sequential models may not expose .input until explicitly called.
+
+Some Keras/TensorFlow versions may not fully establish the model's computational graph until the model has actually been called.
+
+So:
+
+Xte[:1]
+
+means:
+
+Give the model just the first test sample.
+
+And:
+
+training=False
+
+means:
+
+Run it in inference mode rather than training mode.
+
+This matters because layers such as Dropout behave differently during training.
+
+The result is assigned to:
+
+_
+
+because you don't actually need the prediction here.
+
+You only want to ensure the model graph is initialized.
+
+Create an embedding model
+embed = Model(
+    inputs=model.inputs,
+    outputs=model.get_layer('embedding').output
+)
+
+This is clever.
+
+Instead of using:
+
+Input
+ ↓
+LSTM
+ ↓
+Dropout
+ ↓
+Dense 32
+ ↓
+Dense 8
+
+you create a new model that stops at:
+
+Input
+ ↓
+LSTM
+ ↓
+Dropout
+ ↓
+Dense 32
+
+So:
+
+outputs=model.get_layer('embedding').output
+
+means:
+
+Give me the output of the 32-neuron embedding layer.
+
+Then
+emb = embed.predict(Xte, verbose=0)
+
+runs every test sequence through this new model.
+
+If there are:
+
+N test sequences
+
+then:
+
+emb.shape = (N, 32)
+
+For example:
+
+1491 test sequences
+
+would give:
+
+(1491, 32)
+Convert embeddings to DataFrame
+emb_df = pd.DataFrame(
+    emb,
+    columns=[f'LSTM_Feature_{i+1}' for i in range(32)]
+)
+
+The list comprehension:
+
+[f'LSTM_Feature_{i+1}' for i in range(32)]
+
+creates:
+
+LSTM_Feature_1
+LSTM_Feature_2
+LSTM_Feature_3
+...
+LSTM_Feature_32
+
+So the table becomes:
+
+LSTM_Feature_1	LSTM_Feature_2	...	LSTM_Feature_32
+0.21	0.00	...	0.92
+0.34	0.18	...	1.03
+
+Then:
+
+emb_df['Timestamp'] = tte
+emb_df['Actual_Label'] = yte
+emb_df['Predicted_Label'] = pred
+
+adds the information needed to interpret each embedding.
+
+So each row becomes:
+
+32 learned features
++
+timestamp
++
+actual fault
++
+predicted fault
+
+Finally:
+
+emb_df.to_csv(
+    os.path.join(ANALYSIS, 'lstm_embeddings.csv'),
+    index=False
+)
+
+creates:
+
+analysis_outputs/lstm_embeddings.csv
+Why are embeddings useful in your project?
+
+This is the bridge between:
+
+Supervised learning
+
+and:
+
+Pattern discovery
+
+The LSTM learns representations useful for fault classification.
+
+Then K-Means can operate on those learned representations.
+
+So your pipeline becomes:
+
+Raw sensor sequences
+        ↓
+       LSTM
+        ↓
+32-D learned representation
+        ↓
+      K-Means
+        ↓
+Behavioural patterns
+
+This is a reasonable research idea because the clustering is performed on features learned from temporal sensor behaviour rather than directly clustering all raw sensor values.
+
+However, the resulting clusters should still be described as data-derived behavioural patterns, not automatically as physical fault subtypes.
+
+5. Validated pattern discovery: only Faults 1–3
+raw_test = df.iloc[va_end:].copy().reset_index(drop=True)
+
+Remember:
+
+va_end = int(n * 0.85)
+
+Therefore:
+
+df.iloc[va_end:]
+
+selects the final 15% of the original dataset:
+
+85% ─────────────────── 100%
+          TEST
+
+.copy() creates an independent DataFrame.
+
+.reset_index(drop=True) resets its index to:
+
+0, 1, 2, 3, ...
+Convert timestamp
+raw_test['Timestamp'] = raw_test['Timestamp'].astype(str)
+
+Why?
+
+Because emb_df contains:
+
+tte
+
+which was converted to strings earlier:
+
+ts = df['Timestamp'].astype(str).to_numpy()
+
+So both DataFrames need compatible timestamp types for merging.
+
+Merge embeddings with raw sensor data
+merged = emb_df.merge(
+    raw_test,
+    on=['Timestamp'],
+    how='inner',
+    suffixes=('', '_raw')
+)
+
+This is a very important operation.
+
+You have two datasets.
+
+Dataset 1: learned representation
+Timestamp
+LSTM_Feature_1
+...
+LSTM_Feature_32
+Actual_Label
+Predicted_Label
+Dataset 2: raw data
+Timestamp
+Shaft_RPM
+Engine_Load
+Fuel_Flow
+...
+Cylinder4_Exhaust_Temp
+Fault_Label
+
+The merge connects them using:
+
+Timestamp
+
+So the resulting row contains both:
+
+LSTM learned features
++
+raw sensor values
++
+labels
+
+Conceptually:
+
+Timestamp
+   │
+   ├── LSTM_Feature_1 ... LSTM_Feature_32
+   │
+   ├── Actual_Label
+   ├── Predicted_Label
+   │
+   ├── Shaft_RPM
+   ├── Engine_Load
+   ├── Fuel_Flow
+   └── ...
+how='inner'
+
+An inner join keeps only timestamps that exist in both tables.
+
+So:
+
+emb_df ∩ raw_test
+suffixes
+suffixes=('', '_raw')
+
+If both DataFrames contain a column with the same name, pandas can distinguish them.
+
+For example:
+
+Actual_Label
+Actual_Label_raw
+
+depending on what exists in the two inputs.
+
+Label handling
+if 'Fault_Label' in merged.columns:
+    merged['Actual_Label'] = merged['Actual_Label'].astype(int)
+elif 'Actual_Label_raw' in merged.columns:
+    merged['Actual_Label'] = merged['Actual_Label'].astype(int)
+
+The purpose is to make sure:
+
+Actual_Label
+
+is treated as an integer.
+
+For example:
+
+0
+1
+2
+...
+7
+
+rather than strings like:
+
+"0"
+"1"
+"2"
+But notice something
+
+The elif branch:
+
+elif 'Actual_Label_raw' in merged.columns:
+
+doesn't actually use Actual_Label_raw.
+
+It still does:
+
+merged['Actual_Label']
+
+So this code is essentially ensuring the existing Actual_Label is integer.
+
+The comment says:
+
+Keep the LSTM/evaluation label as the canonical label.
+
+That is a sensible approach because your downstream pattern analysis should use the label associated with the evaluated LSTM test sequence.
+
+Pattern discovery setup
+pattern_rows = []
+assign_rows = []
+sensor_rows = []
+
+These are empty lists that will eventually become DataFrames.
+
+pattern_rows
+
+Stores summary information about discovered patterns.
+
+assign_rows
+
+Stores which individual timestamp belongs to which cluster.
+
+sensor_rows
+
+Stores sensor-level statistics for each pattern.
+
+So:
+
+pattern_rows
+     ↓
+discovered_patterns.csv
+
+assign_rows
+     ↓
+pattern_cluster_assignments.csv
+
+sensor_rows
+     ↓
+pattern_sensor_statistics.csv
+Validated K values
+validated_k = {1: 2, 2: 3, 3: 2}
+
+This means:
+
+Fault 1 → 2 clusters
+Fault 2 → 3 clusters
+Fault 3 → 2 clusters
+
+So the algorithm is being instructed to discover:
+
+Fault 1
+ ├── Pattern 1
+ └── Pattern 2
+
+Fault 2
+ ├── Pattern 1
+ ├── Pattern 2
+ └── Pattern 3
+
+Fault 3
+ ├── Pattern 1
+ └── Pattern 2
+Important research point
+
+KMeans does not automatically determine the correct number of clusters here.
+
+You are explicitly supplying:
+
+k = 2
+
+or:
+
+k = 3
+
+Therefore, these values need justification in your research methodology.
+
+The code later calculates silhouette score, which helps assess cluster separation, but it does not use silhouette score to automatically choose K.
+
+Select normal data
+normal = merged[merged['Actual_Label'] == 0]
+
+This extracts:
+
+Actual_Label = 0
+
+which represents:
+
+Normal operating condition
+
+This normal subset becomes the baseline for comparing sensor behaviour.
+
+Loop through Fault 1–3
+for fault, k in validated_k.items():
+
+First iteration:
+
+fault = 1
+k = 2
+
+Second:
+
+fault = 2
+k = 3
+
+Third:
+
+fault = 3
+k = 2
+Extract one fault
+sub = merged[merged['Actual_Label'] == fault].copy()
+
+For example, when:
+
+fault = 1
+
+this selects only:
+
+Fault 1
+Check sample count
+if len(sub) < k:
+    continue
+
+Suppose Fault 1 has only:
+
+1 sample
+
+but:
+
+k = 2
+
+You cannot create two clusters from one sample.
+
+So:
+
+continue
+
+skips that fault.
+
+Extract 32-D learned features
+Z = sub[
+    [f'LSTM_Feature_{i+1}' for i in range(32)]
+].to_numpy()
+
+This extracts:
+
+LSTM_Feature_1
+...
+LSTM_Feature_32
+
+and converts them to a NumPy matrix.
+
+If Fault 1 has 300 samples:
+
+Z.shape = (300, 32)
+
+This is exactly what K-Means needs:
+
+rows    = observations
+columns = features
+K-Means
+km = KMeans(
+    n_clusters=k,
+    random_state=RANDOM_STATE,
+    n_init=20
+).fit(Z)
+
+This is the unsupervised clustering stage.
+
+What is K-Means?
+
+K-Means attempts to divide observations into K groups based on feature similarity.
+
+For example:
+
+Fault 1 embeddings
+
+        Pattern 1
+       ● ● ● ●
+     ● ● ●
+
+                    Pattern 2
+                   ● ● ●
+                 ● ● ● ●
+
+The algorithm tries to place similar observations into the same cluster.
+
+n_clusters=k
+
+For Fault 1:
+
+k = 2
+
+For Fault 2:
+
+k = 3
+
+etc.
+
+random_state=42
+
+Makes K-Means initialization more reproducible.
+
+n_init=20
+
+K-Means can start from different initial centroids.
+
+Some initializations can lead to poor solutions.
+
+So:
+
+n_init=20
+
+means K-Means tries multiple initializations and selects the better solution according to its objective.
+
+This makes the clustering more robust than using only one initialization.
+
+Silhouette score
+sil = silhouette_score(
+    Z,
+    km.labels_
+) if len(np.unique(km.labels_)) > 1 else np.nan
+
+Silhouette score measures how well-separated the clusters are.
+
+Conceptually:
+
+High silhouette
+     ↓
+Samples are relatively close to
+their own cluster and far from
+other clusters
+
+Low silhouette
+     ↓
+Clusters overlap / are poorly separated
+
+Its theoretical range is:
+
+$$ -1 \leq S \leq 1 $$
+
+Generally:
+
+closer to +1 → stronger separation
+around 0     → overlapping clusters
+negative     → potentially poor assignment
+Why this matters
+
+You don't want to say:
+
+"We discovered meaningful patterns"
+
+just because K-Means created groups.
+
+You also need to check whether the groups are actually separated.
+
+Assign cluster labels
+sub['Pattern'] = km.labels_ + 1
+
+K-Means labels normally begin at:
+
+0
+1
+2
+
+But for human-readable reporting, the code converts them to:
+
+1
+2
+3
+
+So:
+
+KMeans 0 → Pattern 1
+KMeans 1 → Pattern 2
+KMeans 2 → Pattern 3
+Save individual pattern assignments
+for _, row in sub[
+    ['Timestamp', 'Actual_Label', 'Predicted_Label', 'Pattern']
+].iterrows():
+    assign_rows.append(row.to_dict())
+
+This loops through every sample in the fault subset.
+
+Each row might become:
+
+{
+    'Timestamp': '2024-01-01 02:20:31',
+    'Actual_Label': 1,
+    'Predicted_Label': 1,
+    'Pattern': 2
+}
+
+This tells you:
+
+At this timestamp, the actual fault was Fault 1, the model predicted Fault 1, and this sample belongs to Pattern 2.
+
+Very useful for temporal analysis.
+
+Loop through each discovered cluster
+for cluster_id in range(1, k + 1):
+
+If:
+
+k = 3
+
+then:
+
+cluster_id = 1
+cluster_id = 2
+cluster_id = 3
+Extract one cluster
+cluster = sub[sub['Pattern'] == cluster_id]
+
+For example:
+
+Fault 2 + Pattern 1
+
+only.
+
+Compare pattern against normal
+top = sensor_profile(
+    cluster,
+    normal,
+    top_n=5
+)
+
+This calls the function you previously shared.
+
+Remember what sensor_profile() does:
+
+Normal median
+        ↓
+Pattern median
+        ↓
+percentage change
+        ↓
+rank by absolute change
+        ↓
+top 5 sensors
+
+So for a particular pattern you might get something conceptually like:
+
+Vibration_Z       +24.5%
+Oil_Temp          +18.2%
+Fuel_Flow         -13.4%
+Oil_Pressure      -11.7%
+Shaft_RPM          +9.8%
+
+This tells you which sensor values differ most strongly from normal operation.
+
+Very important:
+
+This is not automatically root-cause analysis.
+
+For example:
+
+Vibration_Z is 24.5% higher
+
+doesn't prove:
+
+Vibration_Z caused the fault.
+
+It only tells us:
+
+Vibration_Z shows a strong data-derived difference between this behavioural pattern and the normal baseline.
+
+That distinction is important for a research paper.
+
+Create human-readable description
+desc = '; '.join(
+    f'{s} ({"higher" if pct > 0 else "lower" if pct < 0 else "similar"}, {pct:+.1f}%)'
+    for s, _, _, pct in top
+)
+
+This is a compact Python expression.
+
+Suppose:
+
+top = [
+    ('Oil_Temp', 80, 95, 18.75),
+    ('Vibration_Z', 2, 2.5, 25)
+]
+
+Then it produces something like:
+
+Oil_Temp (higher, +18.8%); Vibration_Z (higher, +25.0%)
+'; '.join(...)
+
+joins multiple strings with:
+
+;
+
+between them.
+
+This part
+"higher" if pct > 0
+else "lower" if pct < 0
+else "similar"
+
+is a nested conditional expression.
+
+Equivalent longer version:
+
+if pct > 0:
+    direction = "higher"
+elif pct < 0:
+    direction = "lower"
+else:
+    direction = "similar"
+{pct:+.1f}%
+
+means:
+
++ sign
+1 decimal place
+percentage
+
+Examples:
+
++25.3%
+-12.7%
++0.0%
+Save pattern summary
+pattern_rows.append({
+    'Fault': fault,
+    'Pattern': cluster_id,
+    'Samples': len(cluster),
+    'Silhouette': sil,
+    'Top_Parameters': ', '.join(x[0] for x in top),
+    'Pattern_Description': desc,
+    'Interpretation': 'Descriptive LSTM-representation behavioural pattern; not a proven physical fault subtype or causal root cause.'
+})
+
+This creates one summary record per pattern.
+
+For example:
+
+Fault	Pattern	Samples	Silhouette	Top Parameters
+1	1	120	0.42	Oil_Temp, Vibration_Z, ...
+1	2	85	0.51	Fuel_Flow, Oil_Pressure, ...
+
+The Interpretation column is especially good from a scientific-reporting perspective because it prevents overclaiming.
+
+Now calculate statistics for EVERY sensor
+for sensor in SENSORS:
+
+This loops through all 18 sensors.
+
+Normal median
+nm = float(normal[sensor].median())
+
+For example:
+
+Normal Oil_Temp median = 82.4
+Pattern median
+cm = float(cluster[sensor].median())
+
+For example:
+
+Fault 1 Pattern 2 Oil_Temp median = 96.2
+Calculate percentage change
+pct = ((cm - nm) / nm * 100) if nm != 0 else np.nan
+
+Formula:
+
+$$ \text{Percentage Change} = \frac{\text{Pattern Median}-\text{Normal Median}} {\text{Normal Median}} \times100 $$
+
+Suppose:
+
+Normal = 80
+Pattern = 100
+
+then:
+
+$$ \frac{100-80}{80}\times100=25\% $$
+
+So:
+
++25%
+
+If:
+
+Normal = 100
+Pattern = 80
+
+then:
+
+-20%
+Why use median instead of mean?
+
+Median is less sensitive to extreme values.
+
+For engine sensor data, this can be useful because sensors may contain:
+
+spikes
+transient events
+outliers
+abnormal readings
+
+For example:
+
+[80, 81, 82, 83, 150]
+
+The mean gets pulled toward 150, while the median remains representative of the central behaviour.
+
+Store sensor statistics
+sensor_rows.append({
+    'Fault': fault,
+    'Pattern': cluster_id,
+    'Sensor': sensor,
+    'Normal_Median': nm,
+    'Pattern_Median': cm,
+    'Percent_Change_vs_Normal': pct
+})
+
+This produces detailed sensor-level information.
+
+For example:
+
+Fault	Pattern	Sensor	Normal Median	Pattern Median	% Change
+1	1	Oil_Temp	82	96	+17.1
+1	1	Oil_Pressure	4.2	3.7	-11.9
+1	1	Vibration_Z	1.4	1.9	+35.7
+
+This is much more detailed than the Top_Parameters summary.
+
+Convert lists into DataFrames
+patterns = pd.DataFrame(pattern_rows)
+
+Now all pattern summary dictionaries become one DataFrame.
+
+Save discovered patterns
+patterns.to_csv(
+    os.path.join(OUT, 'discovered_patterns.csv'),
+    index=False
+)
+
+Creates:
+
+outputs/
+└── discovered_patterns.csv
+
+This is your high-level pattern report.
+
+Save cluster assignments
+pd.DataFrame(assign_rows).to_csv(
+    os.path.join(ANALYSIS, 'pattern_cluster_assignments.csv'),
+    index=False
+)
+
+Creates:
+
+analysis_outputs/
+└── pattern_cluster_assignments.csv
+
+This answers:
+
+Which pattern did each timestamp belong to?
+
+Save sensor statistics
+pd.DataFrame(sensor_rows).to_csv(
+    os.path.join(ANALYSIS, 'pattern_sensor_statistics.csv'),
+    index=False
+)
+
+Creates:
+
+analysis_outputs/
+└── pattern_sensor_statistics.csv
+
+This answers:
+
+How did each sensor behave in each discovered pattern compared with normal operation?
+
+🔥 The most important conceptual part
+
+Your code is doing three different levels of analysis.
+
+Level 1 — Classification
+18 raw sensors
+       ↓
+Temporal sequence
+       ↓
+LSTM
+       ↓
+Normal / Fault 1 / ... / Fault 7
+
+Question answered:
+
+What fault class does this sequence belong to?
+
+Level 2 — Learned representation
+Sensor sequence
+      ↓
+LSTM
+      ↓
+32-D embedding
+
+Question answered:
+
+What temporal characteristics did the LSTM learn from this sequence?
+
+Level 3 — Behavioural pattern discovery
+32-D embeddings
+       ↓
+K-Means
+       ↓
+Pattern 1 / Pattern 2 / Pattern 3
+       ↓
+Compare raw sensors with normal
+
+Question answered:
+
+Are there different data-derived behavioural patterns within the same fault class, and which sensor changes characterize them?
+
+That is the key idea behind this section.
+
+Complete output structure from this section
+
+After this code runs, you should have roughly:
+
+model/
+└── final_lstm_model.keras
+
+outputs/
+├── classification_report.csv
+├── confusion_matrix.csv
+└── discovered_patterns.csv
+
+analysis_outputs/
+├── training_history.csv
+├── pipeline_config.json
+├── test_predictions.csv
+├── lstm_embeddings.csv
+├── pattern_cluster_assignments.csv
+└── pattern_sensor_statistics.csv
+
+Each file has a different purpose:
+
+File	Purpose
+final_lstm_model.keras	Saved trained LSTM
+training_history.csv	Training/validation learning history
+pipeline_config.json	Experiment configuration
+classification_report.csv	Precision, recall, F1 for each class
+confusion_matrix.csv	Actual vs predicted classes
+test_predictions.csv	Prediction at every test timestamp
+lstm_embeddings.csv	32-D learned representation
+discovered_patterns.csv	Summary of Fault 1–3 behavioural patterns
+pattern_cluster_assignments.csv	Pattern assigned to each timestamp
+pattern_sensor_statistics.csv	Sensor-level differences from normal
+One methodological point to keep in mind
+
+The clustering section uses test-set embeddings:
+
+raw_test = df.iloc[va_end:]
+
+and then discovers patterns in them. That's fine if you're explicitly treating this as post-hoc exploratory analysis of the held-out test set, but those discovered patterns should not be used to tune the model or choose hyperparameters. Otherwise, the test set would influence model development.
+
+Also, validated_k = {1:2, 2:3, 3:2} means the number of clusters was predetermined. The silhouette score is reported as evidence of separation, but it isn't selecting k automatically.
+
+# ------------------------------------------------------------
+    # 6. Contributing-parameter profiles for Faults 4-7
+    # ------------------------------------------------------------
+    contrib = []
+    for fault in range(4, 8):
+        sub = merged[merged['Actual_Label'] == fault]
+        top = sensor_profile(sub, normal, top_n=5)
+        for rank, (sensor, nm, fm, pct) in enumerate(top, 1):
+            contrib.append({
+                'Fault': fault,
+                'Rank': rank,
+                'Sensor': sensor,
+                'Normal_Median': nm,
+                'Fault_Median': fm,
+                'Percent_Change_vs_Normal': pct
+            })
+    contrib_df = pd.DataFrame(contrib)
+    contrib_df.to_csv(os.path.join(OUT, 'contributing_parameters.csv'), index=False)
+    contrib_df.to_csv(os.path.join(ANALYSIS, 'fault4_7_contributing_parameters.csv'), index=False)
+
+    # ------------------------------------------------------------
+    # 7. Clean human-readable fault reference
+    # ------------------------------------------------------------
+    generate_fault_class_reference(patterns, contrib_df, selected_seq, acc, mp, mr, mf)
+
+    # ------------------------------------------------------------
+    # 8. Timestamp-level predicted fault occurrences
+    # ------------------------------------------------------------
+    occ = pred_df.copy()
+    occ['Fault'] = occ['Predicted_Label'].where(occ['Predicted_Label'] > 0, 0)
+    occ['Group'] = (occ['Fault'] != occ['Fault'].shift()).cumsum()
+    events = occ[occ['Fault'] > 0].groupby(['Fault', 'Group']).agg(
+        Start=('Timestamp', 'first'),
+        End=('Timestamp', 'last'),
+        Samples=('Timestamp', 'size'),
+        Mean_Confidence=('Confidence', 'mean')
+    ).reset_index(drop=True)
+    events.to_csv(os.path.join(ANALYSIS, 'fault_occurrences.csv'), index=False)
+
+    # ------------------------------------------------------------
+    # 9. Final research report
+    # ------------------------------------------------------------
+    with open(os.path.join(OUT, 'FINAL_RESEARCH_REPORT.txt'), 'w', encoding='utf-8') as f:
+        f.write('MARINE ENGINE AI - FINAL CLEAN LSTM RESEARCH REPORT\n')
+        f.write('=' * 72 + '\n\n')
+        f.write('MODEL\n-----\n')
+        f.write('Single 8-class LSTM using 18 raw sensor parameters.\n')
+        f.write(f'Sequence lengths tested: {SEQ_LENGTHS}.\n')
+        f.write(f'Selected sequence length: {selected_seq} seconds.\n')
+        f.write('Manual fault signatures: NONE.\nClass weights: NONE.\n\n')
+        f.write('FINAL TEST METRICS\n------------------\n')
+        f.write(f'Accuracy: {acc:.6f}\n')
+        f.write(f'Macro Precision: {mp:.6f}\n')
+        f.write(f'Macro Recall: {mr:.6f}\n')
+        f.write(f'Macro F1: {mf:.6f}\n')
+        f.write(f'Test samples: {len(yte)}\n\n')
+        f.write('FAULT CLASS REFERENCE\n---------------------\n')
+        f.write('Fault 0: Normal operating condition.\n')
+        f.write('Faults 1-7: dataset-defined fault classes.\n')
+        f.write('Physical classification status: the supplied dataset uses categorical fault labels, while the corresponding physical failure nomenclature requires mapping from the source dataset documentation.\n')
+        f.write('Therefore, this project reports data-derived behavioural descriptions instead of inventing physical names.\n\n')
+        f.write('A detailed CSV fault reference is available in outputs/FAULT_CLASS_REFERENCE.csv.\n\n')
+        f.write('PATTERN ANALYSIS\n----------------\n')
+        f.write('Faults 1-3: validated LSTM-representation behavioural clustering (K=2,3,2).\n')
+        f.write('Faults 4-7: descriptive contributing-parameter analysis only.\n')
+        f.write('Patterns are exploratory behavioural associations, not proven physical fault subtypes.\n')
+        f.write('Sensor associations do not establish causal root causes.\n\n')
+        f.write('FAULT OCCURRENCES\n-----------------\n')
+        f.write('Occurrences are contiguous runs of the same predicted fault label in timestamp-level test predictions.\n')
+        f.write('They are not a physical-event benchmark because the dataset does not provide physical event IDs.\n\n')
+        f.write('LIMITATIONS\n-----------\n')
+        f.write('Dataset-specific evaluation; external-engine validation is not included.\n')
+        f.write('Overlapping temporal windows are not statistically independent.\n')
+        f.write('Sensor associations do not establish physical causality.\n')
+
+    print('\n' + '=' * 72)
+    print('FINAL CLEAN PIPELINE COMPLETED')
+    print('=' * 72)
+    print(f'Selected sequence: {selected_seq} seconds')
+    print(f'Accuracy: {acc:.4f}')
+    print(f'Macro Precision: {mp:.4f}')
+    print(f'Macro Recall: {mr:.4f}')
+    print(f'Macro F1: {mf:.4f}')
+    print('Main outputs:', sorted(os.listdir(OUT)))
+    print('Intermediate outputs:', sorted(os.listdir(ANALYSIS)))
+    print('Model:', os.path.join(MODEL_DIR, 'final_lstm_model.keras'))
+
+
+if __name__ == '__main__':
+    main()
+
+Absolutely. This is the final major section of your pipeline. It takes the outputs already produced and creates:
+
+Contributing-parameter analysis for Faults 4–7
+A clean human-readable fault reference
+Timestamp-level fault occurrences/events
+A final research report
+Final console summary
+The main() entry point
+
+The complete logic is:
+
+Faults 4–7
+   ↓
+Compare sensors with normal
+   ↓
+Top contributing parameters
+   ↓
+CSV
+
+Fault classes + patterns + metrics
+   ↓
+Clean fault reference CSV
+
+Timestamp predictions
+   ↓
+Group consecutive same-fault predictions
+   ↓
+Fault occurrence events
+
+Everything
+   ↓
+FINAL_RESEARCH_REPORT.txt
+6. Contributing-parameter profiles for Faults 4–7
+contrib = []
+
+This creates an empty list.
+
+The purpose is to collect the sensor statistics for Faults 4, 5, 6 and 7.
+
+You previously used K-Means behavioural clustering for Faults 1–3.
+
+Here you deliberately do something different.
+
+Faults 1–3
+LSTM embeddings
+      ↓
+K-Means
+      ↓
+Behavioural patterns
+Faults 4–7
+Raw sensor values
+      ↓
+Compare with normal
+      ↓
+Top 5 changed sensors
+
+So Faults 4–7 don't get internal clustering.
+
+Loop through Faults 4–7
+for fault in range(4, 8):
+
+Remember:
+
+range(4, 8)
+
+produces:
+
+4
+5
+6
+7
+
+So the loop executes four times.
+
+Extract one fault
+sub = merged[merged['Actual_Label'] == fault]
+
+Suppose:
+
+fault = 4
+
+Then:
+
+sub = all test samples whose actual label is Fault 4
+
+For the next iteration:
+
+Fault 5
+
+and so on.
+
+Find top 5 sensor changes
+top = sensor_profile(sub, normal, top_n=5)
+
+This calls your previously defined function:
+
+sensor_profile(...)
+
+Remember what that function does:
+
+For every sensor:
+
+Normal median
+        ↓
+Fault median
+        ↓
+Percentage change
+        ↓
+Rank by absolute percentage change
+
+Then it returns the top 5.
+
+For example, it could produce:
+
+Oil_Temp       +22.4%
+Vibration_Z    +18.7%
+Fuel_Flow      -15.3%
+Oil_Pressure   -11.2%
+Shaft_RPM       +9.5%
+Ranking the parameters
+for rank, (sensor, nm, fm, pct) in enumerate(top, 1):
+
+This is doing several things at once.
+
+Suppose top contains:
+
+[
+    ('Oil_Temp', 80, 98, 22.5),
+    ('Vibration_Z', 2, 2.4, 20),
+    ...
+]
+
+Then:
+
+rank = 1
+sensor = Oil_Temp
+nm = 80
+fm = 98
+pct = 22.5
+
+Next:
+
+rank = 2
+sensor = Vibration_Z
+...
+Why enumerate(top, 1)?
+
+Normally:
+
+enumerate(top)
+
+starts counting from 0.
+
+You want human-readable ranking:
+
+Rank 1
+Rank 2
+Rank 3
+...
+
+so:
+
+enumerate(top, 1)
+
+starts from 1.
+
+Add the information
+contrib.append({
+    'Fault': fault,
+    'Rank': rank,
+    'Sensor': sensor,
+    'Normal_Median': nm,
+    'Fault_Median': fm,
+    'Percent_Change_vs_Normal': pct
+})
+
+Each sensor gets a dictionary.
+
+For example:
+
+Fault = 4
+Rank = 1
+Sensor = Oil_Temp
+Normal_Median = 80
+Fault_Median = 98
+Percent_Change = +22.5%
+
+Eventually contrib may look like:
+
+[
+  Fault 4, Rank 1, Oil_Temp, ...
+  Fault 4, Rank 2, Vibration_Z, ...
+  ...
+  Fault 7, Rank 5, Shaft_RPM, ...
+]
+Convert to DataFrame
+contrib_df = pd.DataFrame(contrib)
+
+Now you have a structured table.
+
+Example:
+
+Fault	Rank	Sensor	Normal Median	Fault Median	% Change
+4	1	Oil_Temp	80	98	+22.5
+4	2	Vibration_Z	2.0	2.4	+20.0
+4	3	Fuel_Flow	100	85	-15.0
+5	1	...	...	...	...
+Save it twice
+contrib_df.to_csv(
+    os.path.join(OUT, 'contributing_parameters.csv'),
+    index=False
+)
+
+Creates:
+
+outputs/contributing_parameters.csv
+
+Then:
+
+contrib_df.to_csv(
+    os.path.join(ANALYSIS, 'fault4_7_contributing_parameters.csv'),
+    index=False
+)
+
+creates:
+
+analysis_outputs/fault4_7_contributing_parameters.csv
+Why two copies?
+
+Likely because:
+
+OUT
+
+contains major/final outputs.
+
+Whereas:
+
+ANALYSIS
+
+contains detailed/intermediate analysis files.
+
+So you're keeping the same useful information in both output categories.
+
+⚠️ Important terminology
+
+The name:
+
+contributing_parameters
+
+can potentially sound causal.
+
+But the code only calculates:
+
+difference from normal
+
+It does not prove that the sensor caused the fault.
+
+For example:
+
+Vibration_Z = +30%
+
+means:
+
+Vibration_Z showed a 30% higher median than the normal baseline.
+
+It does not mean:
+
+Vibration_Z caused Fault 4.
+
+Your later report correctly makes this distinction.
+
+For a research paper, terms such as:
+
+associated parameters
+
+or
+
+parameters showing the largest deviation from normal
+
+are scientifically safer than claiming proven causal contributors.
+
+7. Clean human-readable fault reference
+generate_fault_class_reference(
+    patterns,
+    contrib_df,
+    selected_seq,
+    acc,
+    mp,
+    mr,
+    mf
+)
+
+This calls the function you showed earlier.
+
+Remember, that function combines several pieces of information into:
+
+outputs/FAULT_CLASS_REFERENCE.csv
+
+It includes:
+
+Fault class information
+Normal
+Fault 1
+Fault 2
+...
+Fault 7
+Behavioural patterns
+
+For Faults 1–3:
+
+Fault 1 → Pattern 1, Pattern 2
+Fault 2 → Pattern 1, Pattern 2, Pattern 3
+Fault 3 → Pattern 1, Pattern 2
+Contributing parameters
+
+For Faults 4–7:
+
+Top sensor deviations
+Model information
+Sequence length
+Accuracy
+Macro Precision
+Macro Recall
+Macro F1
+
+This is basically a single consolidated reference file.
+
+Very useful when explaining your project to someone who doesn't want to inspect 8 different CSV files.
+
+8. Timestamp-level predicted fault occurrences
+
+This section is particularly useful for your real-time monitoring concept.
+
+occ = pred_df.copy()
+
+Earlier you created:
+
+pred_df
+
+containing:
+
+Timestamp	Actual_Label	Predicted_Label	Confidence
+
+Now you make a copy.
+
+Why .copy()?
+
+Because you don't want to accidentally modify the original pred_df.
+
+Create a Fault column
+occ['Fault'] = occ['Predicted_Label'].where(
+    occ['Predicted_Label'] > 0,
+    0
+)
+
+This essentially keeps:
+
+Fault 1
+Fault 2
+...
+Fault 7
+
+and converts Normal to:
+
+0
+
+Because:
+
+Predicted_Label > 0
+
+means:
+
+1–7 → fault
+0   → normal
+Example
+
+Original:
+
+Predicted_Label
+0
+0
+1
+1
+1
+0
+2
+2
+0
+
+After this:
+
+Fault
+0
+0
+1
+1
+1
+0
+2
+2
+0
+
+In this particular case, the values don't change.
+
+So why create another column?
+
+It makes the intent of the following event-detection code clearer:
+
+Fault represents the predicted operating/fault state used for grouping.
+
+⭐ The important line
+occ['Group'] = (
+    occ['Fault'] != occ['Fault'].shift()
+).cumsum()
+
+This is one of the most important lines in this entire section.
+
+Let's break it down carefully.
+
+Suppose:
+
+Fault
+0
+0
+0
+1
+1
+1
+0
+2
+2
+0
+Step 1 — shift()
+occ['Fault'].shift()
+
+moves the values down one row:
+
+Fault    shifted
+0        NaN
+0        0
+0        0
+1        0
+1        1
+1        1
+0        1
+2        0
+2        2
+0        2
+Step 2 — Compare
+occ['Fault'] != occ['Fault'].shift()
+
+gives:
+
+True
+False
+False
+True
+False
+False
+True
+True
+False
+True
+
+Meaning:
+
+True = state changed
+False = state stayed the same
+Step 3 — cumsum()
+
+Boolean values behave like:
+
+False = 0
+True  = 1
+
+So:
+
+True
+False
+False
+True
+False
+False
+True
+True
+False
+True
+
+becomes cumulative sum:
+
+1
+1
+1
+2
+2
+2
+3
+4
+4
+5
+
+Therefore:
+
+Fault    Group
+0        1
+0        1
+0        1
+1        2
+1        2
+1        2
+0        3
+2        4
+2        4
+0        5
+
+Now every contiguous run has its own group.
+
+That's clever.
+
+What is a contiguous run?
+
+Suppose predictions are:
+
+Normal
+Normal
+Fault 2
+Fault 2
+Fault 2
+Normal
+Fault 3
+Fault 3
+Normal
+
+The code identifies:
+
+Fault 2 occurrence #1
+Fault 3 occurrence #1
+
+rather than treating every timestamp as a separate event.
+
+Extract only faults
+events = occ[
+    occ['Fault'] > 0
+]
+
+This removes Normal states.
+
+So:
+
+0 → removed
+1–7 → kept
+Group events
+.groupby(['Fault', 'Group'])
+
+This means:
+
+Group together rows having the same predicted fault and belonging to the same contiguous run.
+
+For example:
+
+Fault 2, Group 4
+
+might contain:
+
+02:15:20
+02:15:21
+02:15:22
+02:15:23
+
+These are treated as one predicted occurrence.
+
+Calculate event information
+.agg(
+    Start=('Timestamp', 'first'),
+    End=('Timestamp', 'last'),
+    Samples=('Timestamp', 'size'),
+    Mean_Confidence=('Confidence', 'mean')
+)
+
+This creates four useful fields.
+
+Start
+Start=('Timestamp', 'first')
+
+The first timestamp of the fault run.
+
+Example:
+
+02:15:20
+End
+End=('Timestamp', 'last')
+
+The last timestamp.
+
+Example:
+
+02:15:23
+Samples
+Samples=('Timestamp', 'size')
+
+Number of consecutive predictions in the run.
+
+Example:
+
+4
+Mean_Confidence
+Mean_Confidence=('Confidence', 'mean')
+
+Average softmax confidence across the event.
+
+For example:
+
+0.82
+0.85
+0.91
+0.88
+
+gives:
+
+$$ \frac{0.82+0.85+0.91+0.88}{4} =0.865 $$
+
+So:
+
+Mean_Confidence = 0.865
+Reset index
+.reset_index(drop=True)
+
+After grouping, pandas creates grouped indexes.
+
+This resets the result to:
+
+0
+1
+2
+3
+...
+Save fault occurrences
+events.to_csv(
+    os.path.join(
+        ANALYSIS,
+        'fault_occurrences.csv'
+    ),
+    index=False
+)
+
+Creates:
+
+analysis_outputs/fault_occurrences.csv
+
+It might look like:
+
+Fault	Start	End	Samples	Mean Confidence
+1	02:10:20	02:10:35	16	0.89
+2	02:15:20	02:15:27	8	0.93
+1	02:20:11	02:20:15	5	0.81
+⚠️ Important limitation
+
+Your report correctly says:
+
+Occurrences are contiguous runs of the same predicted fault label.
+
+That is not necessarily a physical fault event.
+
+For example:
+
+Fault 2
+Fault 2
+Fault 2
+
+could mean the model continuously predicted Fault 2.
+
+It doesn't prove that a real-world mechanical fault started exactly at the first timestamp and ended exactly at the last timestamp.
+
+Why?
+
+Because your dataset doesn't contain physical event IDs or event start/end annotations.
+
+Therefore:
+
+Predicted occurrence
+        ≠
+Proven physical event
+
+This distinction is excellent to maintain in your research.
+
+9. Final research report
+
+Now the code creates a text report.
+
+with open(
+    os.path.join(OUT, 'FINAL_RESEARCH_REPORT.txt'),
+    'w',
+    encoding='utf-8'
+) as f:
+
+This creates:
+
+outputs/
+└── FINAL_RESEARCH_REPORT.txt
+
+'w' means write mode.
+
+If the file already exists, it will be overwritten.
+
+Report title
+f.write(
+    'MARINE ENGINE AI - FINAL CLEAN LSTM RESEARCH REPORT\n'
+)
+
+\n means newline.
+
+Then:
+
+f.write('=' * 72 + '\n\n')
+
+creates a separator:
+
+========================================================================
+MODEL section
+f.write('MODEL\n-----\n')
+
+creates:
+
+MODEL
+-----
+
+Then:
+
+f.write(
+    'Single 8-class LSTM using 18 raw sensor parameters.\n'
+)
+
+This summarizes the model.
+
+Your model uses:
+
+18 sensors
+     ↓
+LSTM
+     ↓
+8 output classes
+Sequence lengths
+f.write(
+    f'Sequence lengths tested: {SEQ_LENGTHS}.\n'
+)
+
+If:
+
+SEQ_LENGTHS = [10, 20, 30]
+
+the report says:
+
+Sequence lengths tested: [10, 20, 30].
+
+Then:
+
+f.write(
+    f'Selected sequence length: {selected_seq} seconds.\n'
+)
+
+records the chosen sequence length.
+
+Again, research caveat
+
+This should technically be called:
+
+selected sequence length of X observations
+
+unless your dataset sampling frequency has been explicitly established as 1 Hz.
+
+If each row represents exactly one second, then "seconds" is appropriate.
+
+Manual signatures
+f.write('Manual fault signatures: NONE.\nClass weights: NONE.\n\n')
+
+This records:
+
+Manual rules → No
+Class weights → No
+
+That is useful for reproducibility.
+
+Final test metrics
+f.write('FINAL TEST METRICS\n------------------\n')
+
+Then:
+
+f.write(f'Accuracy: {acc:.6f}\n')
+f.write(f'Macro Precision: {mp:.6f}\n')
+f.write(f'Macro Recall: {mr:.6f}\n')
+f.write(f'Macro F1: {mf:.6f}\n')
+
+The :.6f means:
+
+Display six digits after the decimal point.
+
+For example:
+
+Accuracy: 0.851800
+
+rather than:
+
+Accuracy: 0.8518
+
+This gives consistent numerical formatting.
+
+Number of test samples
+f.write(f'Test samples: {len(yte)}\n\n')
+
+len(yte) gives the number of test sequences.
+
+This is useful because metrics without sample size are harder to interpret.
+
+Fault class reference
+
+The report explicitly says:
+
+f.write('Fault 0: Normal operating condition.\n')
+
+Then:
+
+f.write('Faults 1-7: dataset-defined fault classes.\n')
+
+This is scientifically careful.
+
+You're not inventing physical names for Fault 1–7.
+
+Why is this statement important?
+f.write(
+    'Physical classification status: the supplied dataset uses categorical fault labels, while the corresponding physical failure nomenclature requires mapping from the source dataset documentation.\n'
+)
+
+This means:
+
+Dataset says:
+Fault 1
+Fault 2
+...
+Fault 7
+
+But unless the dataset documentation explicitly tells you:
+
+Fault 1 = bearing failure
+Fault 2 = lubrication failure
+...
+
+you should not invent those meanings.
+
+That's a very important research principle:
+
+Don't convert a machine-learning label into a physical diagnosis without supporting documentation.
+
+Behavioural pattern analysis
+f.write(
+    'Faults 1-3: validated LSTM-representation behavioural clustering (K=2,3,2).\n'
+)
+
+This documents:
+
+Fault 1 → K=2
+Fault 2 → K=3
+Fault 3 → K=2
+
+Then:
+
+f.write(
+    'Faults 4-7: descriptive contributing-parameter analysis only.\n'
+)
+
+This tells the reader that Faults 4–7 didn't undergo the same clustering process.
+
+Scientific limitation statement
+f.write(
+    'Patterns are exploratory behavioural associations, not proven physical fault subtypes.\n'
+)
+
+This is very important.
+
+K-Means gives you:
+
+Pattern 1
+Pattern 2
+Pattern 3
+
+but that doesn't automatically mean:
+
+Pattern 1 = physical failure mechanism A
+Pattern 2 = physical failure mechanism B
+
+You would need engineering/domain validation for that.
+
+Then:
+
+f.write(
+    'Sensor associations do not establish causal root causes.\n\n'
+)
+
+Again:
+
+Observed correlation
+        ≠
+Proven causation
+Fault occurrences section
+f.write('FAULT OCCURRENCES\n-----------------\n')
+
+Then:
+
+f.write(
+    'Occurrences are contiguous runs of the same predicted fault label in timestamp-level test predictions.\n'
+)
+
+This precisely defines what fault_occurrences.csv represents.
+
+Then:
+
+f.write(
+    'They are not a physical-event benchmark because the dataset does not provide physical event IDs.\n\n'
+)
+
+This prevents overclaiming.
+
+Limitations
+f.write('LIMITATIONS\n-----------\n')
+
+This is a particularly important research section.
+
+Dataset-specific evaluation
+f.write(
+    'Dataset-specific evaluation; external-engine validation is not included.\n'
+)
+
+Meaning:
+
+Tested on supplied dataset
+        ↓
+Not yet validated on
+a different real marine engine
+
+Therefore, you shouldn't claim that the model is universally applicable to every marine engine.
+
+Overlapping windows
+f.write(
+    'Overlapping temporal windows are not statistically independent.\n'
+)
+
+This is an important time-series limitation.
+
+Suppose:
+
+Sequence 1:
+Rows 1–10
+
+Sequence 2:
+Rows 2–11
+
+Sequence 3:
+Rows 3–12
+
+These sequences share most of their observations.
+
+Therefore:
+
+Sequence 1
+      ↘
+       Sequence 2
+            ↘
+             Sequence 3
+
+are highly correlated.
+
+So you should not interpret every sequence as an independent observation in a statistical sense.
+
+This is a good limitation to explicitly mention in a research paper.
+
+Sensor associations
+f.write(
+    'Sensor associations do not establish physical causality.\n'
+)
+
+Again:
+
+Sensor changed
+       ↓
+Associated with fault
+       ≠
+Sensor caused fault
+10. Final console output
+
+After saving everything, the code prints:
+
+print('\n' + '=' * 72)
+print('FINAL CLEAN PIPELINE COMPLETED')
+print('=' * 72)
+
+So the terminal displays a clear completion message.
+
+Then:
+
+print(f'Selected sequence: {selected_seq} seconds')
+
+shows which sequence length was selected.
+
+Then:
+
+print(f'Accuracy: {acc:.4f}')
+print(f'Macro Precision: {mp:.4f}')
+print(f'Macro Recall: {mr:.4f}')
+print(f'Macro F1: {mf:.4f}')
+
+prints the final metrics.
+
+Here :.4f means four decimal places.
+
+For example:
+
+Accuracy: 0.8518
+Macro Precision: 0.8255
+Macro Recall: 0.7055
+Macro F1: 0.7398
+List generated files
+print('Main outputs:', sorted(os.listdir(OUT)))
+
+os.listdir(OUT) gets everything inside the outputs folder.
+
+sorted(...) sorts the filenames alphabetically.
+
+So you can immediately see what was generated.
+
+Similarly:
+
+print(
+    'Intermediate outputs:',
+    sorted(os.listdir(ANALYSIS))
+)
+
+shows the analysis files.
+
+Model location
+print(
+    'Model:',
+    os.path.join(
+        MODEL_DIR,
+        'final_lstm_model.keras'
+    )
+)
+
+prints the exact model path.
+
+For example:
+
+Model: C:\...\Marine_Engine_AI\model\final_lstm_model.keras
+Finally: Python entry point
+if __name__ == '__main__':
+    main()
+
+This is a very common Python pattern.
+
+Let's understand it carefully.
+
+Every Python file has a special variable:
+
+__name__
+
+When you execute the file directly:
+
+python train_and_analyze.py
+
+Python sets:
+
+__name__ = '__main__'
+
+Therefore:
+
+if __name__ == '__main__':
+
+becomes true.
+
+Then:
+
+main()
+
+runs your complete pipeline.
+
+Why use this?
+
+Suppose another Python file imports this file:
+
+import train_and_analyze
+
+Then:
+
+__name__
+
+will not be:
+
+__main__
+
+So:
+
+main()
+
+doesn't automatically execute.
+
+This allows the file to be used both as:
+
+standalone program
+
+and:
+
+importable module
+🔥 Your entire project pipeline now
+
+You've now shown essentially the whole pipeline.
+
+The complete architecture is:
+
+                    MARINE ENGINE DATA
+                           │
+                           ▼
+                  Load + Validate CSV
+                           │
+                           ▼
+                 Sort by Timestamp
+                           │
+                           ▼
+              18 Sensor Parameters
+                           │
+                           ▼
+             Chronological 70/15/15
+                           │
+                           ▼
+             StandardScaler
+             fit only on TRAIN
+                           │
+                           ▼
+                ┌──────────────────┐
+                │ Sequence lengths │
+                │   10 / 20 / 30   │
+                └──────────────────┘
+                           │
+                           ▼
+                Sliding Time Windows
+                           │
+                           ▼
+                  ┌─────────────┐
+                  │    LSTM     │
+                  │     64      │
+                  └─────────────┘
+                           │
+                           ▼
+                       Dropout
+                           │
+                           ▼
+                   Dense 32
+                   "Embedding"
+                           │
+                  ┌────────┴────────┐
+                  ▼                 ▼
+             Dense 8            32-D
+             Softmax          Representation
+                  │                 │
+                  ▼                 ▼
+           Fault Prediction      K-Means
+                  │                 │
+                  │          Faults 1–3
+                  │                 │
+                  │          Behavioural
+                  │           Patterns
+                  │
+                  ▼
+       Classification Metrics
+       Accuracy / Precision /
+       Recall / Macro F1
+                  │
+                  ▼
+         Confusion Matrix
+                  │
+                  ▼
+        Timestamp Predictions
+                  │
+                  ▼
+       Contiguous Fault Runs
+                  │
+                  ▼
+         Fault Occurrences
+
+And separately:
+
+Faults 4–7
+     │
+     ▼
+Compare with Normal
+     │
+     ▼
+Median differences
+     │
+     ▼
+Top 5 sensor deviations
+     │
+     ▼
+Contributing-parameter profile
+📁 Final files and exactly what each one means
+File	What it tells you
+final_lstm_model.keras	Trained LSTM ready for inference
+training_history.csv	How training/validation performance changed by epoch
+pipeline_config.json	How the experiment was configured
+classification_report.csv	Performance for each fault class
+confusion_matrix.csv	Which classes are confused
+test_predictions.csv	Prediction at each test timestamp
+lstm_embeddings.csv	32 learned features for every test sequence
+discovered_patterns.csv	Fault 1–3 behavioural pattern summaries
+pattern_cluster_assignments.csv	Pattern assigned to every relevant timestamp
+pattern_sensor_statistics.csv	Sensor behaviour for every Fault 1–3 pattern
+contributing_parameters.csv	Top sensor deviations for Faults 4–7
+fault4_7_contributing_parameters.csv	Same Fault 4–7 analysis in analysis folder
+FAULT_CLASS_REFERENCE.csv	Consolidated human-readable fault reference
+fault_occurrences.csv	Consecutive predicted fault runs
+FINAL_RESEARCH_REPORT.txt	Clean summary of the complete experiment
+⭐ One important correction I would make before using this in your research paper
+
+There are two places where your wording should be handled carefully:
+
+1. "seconds"
+
+Your code uses:
+
+selected_seq
+
+as a number of rows/observations.
+
+Only call it:
+
+10 seconds
+20 seconds
+30 seconds
+
+if you have verified that the dataset has exactly one observation per second.
+
+Otherwise use:
+
+10 observations
+20 observations
+30 observations
+2. "Contributing parameters"
+
+Your analysis measures deviation/association, not causality.
+
+So in your paper, a safer wording is:
+
+Parameters showing the largest deviation from the normal operating baseline
+
+rather than:
+
+Parameters responsible for the fault.
+
+Likewise, your discovered patterns should be called:
+
+LSTM-representation-based behavioural patterns
+
+rather than physical fault subtypes unless the dataset documentation or engineering validation confirms the physical interpretation.
+
+Overall, the code has a clear research structure: supervised temporal fault classification → learned representation extraction → exploratory behavioural pattern analysis → sensor deviation analysis → timestamp-level fault occurrence reporting.
