@@ -1,0 +1,3219 @@
+Yes. This distinction is very important for your viva. In your train_final.py, there are three categories:
+
+Python built-in modules/functions
+Third-party library functions/classes
+Functions created by us in our project
+
+Based on your uploaded code:
+
+1. Python built-in / standard-library modules
+
+These are not created by us. They come with Python.
+
+os
+import os
+
+Used for:
+
+creating file paths
+checking whether files exist
+listing folders
+creating directories
+
+Examples from your code:
+
+os.path.dirname()
+os.path.abspath()
+os.path.join()
+os.makedirs()
+os.listdir()
+os.path.isdir()
+os.remove()
+
+These are from Python's standard os module.
+
+json
+import json
+
+Used for saving configuration information in JSON format.
+
+Your code uses:
+
+json.dump()
+
+For example, it saves:
+
+sequence lengths
+selected sequence
+sensor names
+number of classes
+random state
+
+into:
+
+pipeline_config.json
+shutil
+import shutil
+
+Used for file/folder operations.
+
+Your code uses:
+
+shutil.rmtree()
+
+to delete old generated folders before starting a fresh run.
+
+2. Python built-in functions
+
+These are also not created by us.
+
+Some important ones in your code are:
+
+Function	Purpose
+len()	Finds the number of items
+range()	Generates a sequence of numbers
+int()	Converts a value to integer
+float()	Converts a value to floating-point number
+str()	Converts a value to string
+list()	Creates/converts to a list
+print()	Displays output
+open()	Opens a file
+enumerate()	Gives index + value while looping
+sorted()	Sorts values
+isinstance() etc.	Python type checking when used
+
+For example:
+
+n = len(df)
+
+len() is a Python built-in function.
+
+We did not create it.
+
+3. NumPy — third-party library
+
+This:
+
+import numpy as np
+
+is not our library.
+
+It is the NumPy library.
+
+Your code uses things such as:
+
+np.asarray()
+np.array()
+np.float32
+np.nan
+np.random.seed()
+np.unique()
+np.isfinite()
+
+For example:
+
+np.asarray(xs, dtype=np.float32)
+
+means:
+
+Convert the Python list xs into a NumPy numerical array.
+
+4. Pandas — third-party library
+
+This:
+
+import pandas as pd
+
+is the Pandas library.
+
+It is used heavily in your project for tabular data.
+
+Examples:
+
+pd.read_csv()
+pd.DataFrame()
+pd.to_datetime()
+
+And DataFrame methods:
+
+df.sort_values()
+df.reset_index()
+df.to_csv()
+df.median()
+df.astype()
+df.copy()
+df.merge()
+df.iterrows()
+
+These are Pandas functions/classes/methods, not functions created by us.
+
+For example:
+
+df = pd.read_csv(DATA)
+
+means:
+
+Ask Pandas to read the CSV file.
+
+5. TensorFlow / Keras — third-party library
+
+This is the most important library in our project.
+
+import tensorflow as tf
+
+and:
+
+from tensorflow.keras import Sequential, Model
+
+TensorFlow/Keras provides the neural-network functionality.
+
+These are not created by us:
+
+Sequential
+Model
+Input
+LSTM
+Dense
+Dropout
+EarlyStopping
+ReduceLROnPlateau
+
+Your code uses them to construct and train the neural network.
+
+6. LSTM
+LSTM(64, return_sequences=False)
+
+This is provided by Keras.
+
+We did not create the LSTM algorithm ourselves.
+
+We simply configure it:
+
+64
+↓
+number of LSTM units
+
+and:
+
+return_sequences=False
+↓
+return only the final sequence representation
+
+So in your viva, say:
+
+“LSTM is provided by TensorFlow/Keras. We configure and use it in our model; we did not implement the LSTM algorithm from scratch.”
+
+7. Dense
+Dense(32)
+
+and:
+
+Dense(8)
+
+are also Keras layers.
+
+We configure them.
+
+First Dense
+Dense(32, activation='relu', name='embedding')
+
+creates the 32-dimensional learned representation.
+
+Second Dense
+Dense(8, activation='softmax')
+
+creates the eight-class output.
+
+8. Scikit-learn
+
+This:
+
+from sklearn.preprocessing import StandardScaler
+
+and:
+
+from sklearn.metrics import ...
+
+and:
+
+from sklearn.cluster import KMeans
+
+come from Scikit-learn.
+
+We did not create these algorithms.
+
+StandardScaler
+StandardScaler()
+
+provided by Scikit-learn.
+
+Used for:
+
+normalization / standardization
+accuracy_score
+accuracy_score(yte, pred)
+
+Scikit-learn function.
+
+Calculates:
+
+How many predictions were correct overall?
+
+classification_report
+classification_report(...)
+
+Scikit-learn function.
+
+Produces:
+
+Precision
+Recall
+F1-score
+Support
+
+for each class.
+
+confusion_matrix
+confusion_matrix(...)
+
+Scikit-learn function.
+
+Creates the:
+
+Actual × Predicted
+
+matrix.
+
+precision_recall_fscore_support
+precision_recall_fscore_support(...)
+
+Scikit-learn function.
+
+Calculates:
+
+Precision
+Recall
+F1
+Support
+KMeans
+KMeans(...)
+
+Scikit-learn clustering algorithm.
+
+We use it to discover behavioural groups in the 32-dimensional LSTM representation.
+
+silhouette_score
+silhouette_score(...)
+
+Scikit-learn function.
+
+Used to measure how well separated the discovered clusters are.
+
+9. Functions CREATED BY US
+
+This is the most important part.
+
+These functions are written specifically for our project.
+
+Your code defines:
+
+def reset_generated_dirs():
+def make_sequences(X, y, ts, seq):
+def build_model(seq_len):
+def train_one(seq_len, Xs, y, ts, tr_end, va_end):
+def sensor_profile(fault_df, normal_df, top_n=5):
+def generate_fault_class_reference(...):
+
+and:
+
+def main():
+
+These are our project functions.
+
+10. reset_generated_dirs()
+
+Created by us.
+
+def reset_generated_dirs():
+
+Purpose:
+
+Clean old generated results before starting a new run.
+
+It uses built-in/library functions such as:
+
+os.makedirs()
+os.listdir()
+os.path.isdir()
+shutil.rmtree()
+os.remove()
+
+So:
+
+reset_generated_dirs()
+       ↓
+OUR FUNCTION
+       ↓
+uses Python os/shutil functions
+11. make_sequences()
+
+Created by us.
+
+def make_sequences(X, y, ts, seq):
+
+This is one of the most important custom functions.
+
+Its job is:
+
+Convert normal time-series rows into sequences that the LSTM can understand.
+
+For example:
+
+Raw data:
+
+Row 1
+Row 2
+Row 3
+...
+Row 30
+
+becomes:
+
+Sequence 1 = Rows 1–30
+
+Sequence 2 = Rows 2–31
+
+Sequence 3 = Rows 3–32
+
+The LSTM then receives:
+
+30 × 18
+
+for each sequence.
+
+The sliding-window logic here is ours.
+
+The LSTM itself is from Keras.
+
+12. build_model()
+
+Created by us.
+
+def build_model(seq_len):
+
+But inside it we use Keras components:
+
+Sequential()
+Input()
+LSTM()
+Dropout()
+Dense()
+
+So:
+
+build_model()
+      ↓
+OUR FUNCTION
+      ↓
+uses Keras layers
+      ↓
+creates our configured LSTM architecture
+
+We didn't implement LSTM mathematics ourselves.
+
+We designed the architecture using the library.
+
+13. train_one()
+
+Created by us.
+
+def train_one(seq_len, Xs, y, ts, tr_end, va_end):
+
+This function controls one complete training experiment.
+
+It:
+
+Creates train sequences
+        ↓
+Creates validation sequences
+        ↓
+Creates test sequences
+        ↓
+Builds LSTM
+        ↓
+Trains LSTM
+        ↓
+Predicts validation data
+        ↓
+Calculates validation Macro F1
+        ↓
+Predicts test data
+        ↓
+Calculates test Accuracy
+        ↓
+Calculates test Macro F1
+
+This entire workflow was designed by us.
+
+But it calls library functions such as:
+
+model.fit()
+model.predict()
+accuracy_score()
+precision_recall_fscore_support()
+14. sensor_profile()
+
+Created by us.
+
+def sensor_profile(fault_df, normal_df, top_n=5):
+
+This is our custom analysis function.
+
+It:
+
+Normal median
+      ↓
+Fault median
+      ↓
+Percentage difference
+      ↓
+Sort largest differences
+      ↓
+Return top 5 sensors
+
+The mathematical comparison is implemented by us using Pandas/NumPy operations.
+
+15. generate_fault_class_reference()
+
+Created by us.
+
+def generate_fault_class_reference(...)
+
+This was added to create the clean:
+
+FAULT_CLASS_REFERENCE.csv
+
+It collects:
+
+Fault class information
+Behavioural patterns
+Contributing parameters
+Model information
+
+and puts them into one structured output.
+
+It uses Pandas to actually write the CSV.
+
+16. main()
+
+Created by us.
+
+def main():
+
+This is the main controller of the whole project.
+
+It calls the other custom functions and library functions in the correct order.
+
+Think of it as the project manager.
+
+main()
+  │
+  ├── reset_generated_dirs()
+  │
+  ├── read dataset
+  │
+  ├── normalize
+  │
+  ├── train_one(10)
+  │
+  ├── train_one(20)
+  │
+  ├── train_one(30)
+  │
+  ├── select best sequence
+  │
+  ├── evaluate model
+  │
+  ├── extract embedding
+  │
+  ├── KMeans analysis
+  │
+  ├── contributing parameter analysis
+  │
+  ├── generate_fault_class_reference()
+  │
+  ├── fault occurrence analysis
+  │
+  └── final report
+17. if __name__ == '__main__'
+
+This part:
+
+if __name__ == '__main__':
+    main()
+
+uses a Python built-in mechanism.
+
+main() is our function.
+
+The purpose is:
+
+Run the complete pipeline when train_final.py is executed directly.
+
+So when you type:
+
+python train_final.py
+
+Python reaches:
+
+main()
+
+and the entire project starts.
+
+18. Very important distinction
+
+You can remember it like this:
+
+Item	Who provides it?
+os	Python
+json	Python
+shutil	Python
+len()	Python
+range()	Python
+print()	Python
+open()	Python
+numpy	Third-party library
+pandas	Third-party library
+tensorflow	Third-party library
+StandardScaler	Scikit-learn
+KMeans	Scikit-learn
+accuracy_score	Scikit-learn
+classification_report	Scikit-learn
+confusion_matrix	Scikit-learn
+silhouette_score	Scikit-learn
+LSTM	TensorFlow/Keras
+Dense	TensorFlow/Keras
+Dropout	TensorFlow/Keras
+EarlyStopping	TensorFlow/Keras
+ReduceLROnPlateau	TensorFlow/Keras
+reset_generated_dirs()	Our function
+make_sequences()	Our function
+build_model()	Our function
+train_one()	Our function
+sensor_profile()	Our function
+generate_fault_class_reference()	Our function
+main()	Our function
+19. One very important viva question
+Guide: “Did you develop the LSTM algorithm yourself?”
+
+Don't say yes.
+
+Say:
+
+“No. We used the LSTM implementation provided by TensorFlow/Keras. Our contribution is the way we prepare the marine-engine time-series data, construct the temporal sequences, configure the LSTM architecture, select the sequence length using validation Macro F1, evaluate the model, and perform the subsequent behavioural and contributing-parameter analysis.”
+
+That is technically accurate.
+
+Guide: “Then what did you implement?”
+
+You can say:
+
+“We implemented the complete project pipeline around the library components, including data validation, chronological splitting, sequence generation, model-building configuration, training and evaluation workflow, sensor-profile analysis, behavioural pattern analysis, fault-occurrence extraction, fault-class reference generation, and final reporting.”
+
+That is the distinction we should keep clear throughout your project explanation.
+
+
+
+
+Yes. This terminal output is very important because it shows exactly what happens while your LSTM is learning. I’ll explain the output you uploaded from top to bottom, including epoch, loss, accuracy, validation loss, learning rate, why the values change, and why training stops. The explanation below is based on your actual terminal output.
+
+1. First, what is the terminal doing?
+
+Your program does three separate LSTM experiments:
+
+Sequence length = 10 seconds
+Sequence length = 20 seconds
+Sequence length = 30 seconds
+
+It trains a separate LSTM for each one and compares them.
+
+Your terminal confirms this:
+
+SEQUENCE LENGTH = 10 seconds
+...
+SEQUENCE LENGTH = 20 seconds
+...
+SEQUENCE LENGTH = 30 seconds
+
+The purpose is:
+
+Find out how much previous time information gives the model the best validation performance.
+
+2. Before training — TensorFlow messages
+
+You first see:
+
+oneDNN custom operations are on
+
+and:
+
+This TensorFlow binary is optimized to use available CPU instructions.
+
+These are TensorFlow information messages, not errors.
+
+They basically mean:
+
+TensorFlow is using CPU optimizations available on your computer.
+
+You also see:
+
+TensorFlow GPU support is not available on native Windows
+
+This is a warning, but your project still runs.
+
+It means TensorFlow is using your CPU instead of an NVIDIA CUDA GPU.
+
+So:
+
+Your code
+   ↓
+TensorFlow
+   ↓
+CPU
+   ↓
+LSTM training
+
+Nothing is wrong with the model because of this.
+
+3. Now the important part — Epoch
+
+You see:
+
+Epoch 1/40
+Epoch 2/40
+Epoch 3/40
+...
+
+What is an epoch?
+
+An epoch means:
+
+One complete pass through all the training sequences.
+
+Suppose your training set contains thousands of sequences.
+
+During:
+
+Epoch 1
+
+the model sees the training data once.
+
+Then:
+
+Epoch 2
+
+it sees the same training data again, but with updated weights.
+
+And so on.
+
+4. Why does it say 110/110?
+
+For example:
+
+110/110
+
+does not mean 110 epochs.
+
+It means:
+
+The training data was divided into 110 batches, and all 110 batches were processed during that epoch.
+
+Your batch size is:
+
+64
+
+So approximately:
+
+Training samples
+÷
+64
+≈
+110 batches
+
+Therefore:
+
+110/110
+
+means:
+
+110 batches completed out of 110.
+
+5. What is a batch?
+
+A batch is a small group of training sequences processed together.
+
+Instead of doing:
+
+All training data
+       ↓
+LSTM
+
+the model does:
+
+Batch 1 → LSTM → update weights
+Batch 2 → LSTM → update weights
+Batch 3 → LSTM → update weights
+...
+Batch 110 → LSTM → update weights
+
+Then one epoch is completed.
+
+6. What is accuracy?
+
+Look at your first epoch:
+
+accuracy: 0.6434
+
+That means:
+
+64.34%
+
+training accuracy.
+
+In simple terms:
+
+During that epoch, the model correctly classified about 64.34% of the training sequences.
+
+Then:
+
+Epoch 2
+accuracy: 0.8049
+
+means approximately:
+
+80.49%
+
+The model has learned significantly more.
+
+Then:
+
+Epoch 3
+accuracy: 0.8417
+
+= 84.17%.
+
+And it continues improving.
+
+Your 10-second experiment shows this progression clearly.
+
+7. What exactly is loss?
+
+This is one of the most important concepts.
+
+Your model has:
+
+loss = sparse_categorical_crossentropy
+
+The loss measures:
+
+How wrong the model's predicted probabilities are compared with the correct class.
+
+It is not simply the percentage of wrong predictions.
+
+For example, suppose the correct class is:
+
+Fault 4
+
+Model A predicts:
+
+Normal = 0.90
+Fault 4 = 0.05
+
+This is a very bad prediction.
+
+Model B predicts:
+
+Normal = 0.05
+Fault 4 = 0.85
+
+This is much better.
+
+The loss function captures not only whether the class was correct, but also how confident the model was in its prediction.
+
+8. Why does loss decrease?
+
+Look at your 10-second experiment:
+
+Epoch 1
+loss = 1.3167
+
+Epoch 2
+loss = 0.6898
+
+Epoch 3
+loss = 0.5217
+
+Epoch 4
+loss = 0.4688
+
+...
+Epoch 20
+loss = 0.2742
+
+This is generally what we want.
+
+The model starts with relatively poor weights.
+
+Then:
+
+Prediction
+   ↓
+Calculate loss
+   ↓
+Backpropagation
+   ↓
+Update weights
+   ↓
+Better prediction
+
+This happens repeatedly.
+
+Therefore the training loss generally goes down.
+
+9. What is val_accuracy?
+
+Now look at:
+
+val_accuracy: 0.7237
+
+This means:
+
+The model's accuracy on the validation data was 72.37%.
+
+The validation data is different from the data used to update the model weights.
+
+So it helps us see:
+
+Can the model perform well on data it wasn't directly training on?
+
+10. Training accuracy vs validation accuracy
+
+This distinction is extremely important.
+
+You have:
+
+accuracy
+
+and:
+
+val_accuracy
+accuracy
+
+Performance on:
+
+TRAINING DATA
+val_accuracy
+
+Performance on:
+
+VALIDATION DATA
+
+So:
+
+Training data
+     ↓
+Model learns
+     ↓
+training accuracy
+
+Separate validation data
+     ↓
+Model is tested
+     ↓
+validation accuracy
+11. What is val_loss?
+
+This is the validation equivalent of loss.
+
+loss
+
+= training loss
+
+val_loss
+
+= validation loss.
+
+For example, your first 10-second epoch:
+
+loss     = 1.3167
+val_loss = 0.9119
+
+The model has a higher training loss and validation loss initially.
+
+Then:
+
+Epoch 2
+
+loss     = 0.6898
+val_loss = 0.5399
+
+Then:
+
+Epoch 3
+
+loss     = 0.5217
+val_loss = 0.4780
+
+The validation loss is also improving.
+
+That tells us the model is genuinely learning useful patterns.
+
+12. Why is validation loss sometimes lower than training loss?
+
+You might notice:
+
+loss = 1.3167
+val_loss = 0.9119
+
+and wonder:
+
+“Shouldn't validation loss always be higher?”
+
+No.
+
+It can be lower.
+
+One reason in your model is the use of:
+
+Dropout(0.2)
+
+During training, dropout randomly disables some connections.
+
+During validation, dropout is not applied in the same way.
+
+Therefore training can sometimes be harder than validation.
+
+So:
+
+loss > val_loss
+
+is not automatically a problem.
+
+13. The most important part — why does validation loss eventually stop improving?
+
+Look at your 10-second experiment.
+
+Early on:
+
+Epoch 3
+val_loss = 0.4780
+
+Epoch 5
+val_loss = 0.4397
+
+Epoch 8
+val_loss = 0.4267
+
+Epoch 12
+val_loss = 0.4093
+
+Epoch 13
+val_loss = 0.4025
+
+This is improving.
+
+But later:
+
+Epoch 14
+val_loss = 0.4043
+
+Epoch 15
+val_loss = 0.4070
+
+Epoch 16
+val_loss = 0.4079
+
+Epoch 17
+val_loss = 0.4102
+
+Now validation loss is getting worse.
+
+At the same time:
+
+training accuracy
+
+continues increasing.
+
+This is a classic sign that the model is becoming increasingly specialized to the training data.
+
+In simple terms:
+
+The model is continuing to learn the training data, but it is no longer improving its performance on unseen validation data.
+
+That is the point where we become concerned about overfitting.
+
+14. Your 30-second experiment shows this very clearly
+
+Look at the 30-second experiment.
+
+At Epoch 14:
+
+accuracy     = 0.8766
+val_accuracy = 0.8620
+loss         = 0.3669
+val_loss     = 0.4032
+
+Then Epoch 21:
+
+accuracy     = 0.9019
+val_accuracy = 0.8640
+loss         = 0.2926
+val_loss     = 0.3971
+
+Then:
+
+Epoch 25
+accuracy     = 0.9161
+val_accuracy = 0.8518
+loss         = 0.2422
+val_loss     = 0.4223
+
+Notice:
+
+Training accuracy
+87.66%
+      ↓
+90.19%
+      ↓
+91.61%
+
+keeps increasing.
+
+But:
+
+Validation accuracy
+86.20%
+      ↓
+86.40%
+      ↓
+85.18%
+
+starts falling.
+
+And:
+
+Validation loss
+0.4032
+      ↓
+0.3971
+      ↓
+0.4223
+
+starts increasing.
+
+This is exactly why we use validation monitoring.
+
+15. So what is the model actually doing?
+
+Think of the model as a student.
+
+Early training
+
+The student doesn't know much.
+
+Epoch 1
+↓
+learns basic patterns
+Middle training
+Epoch 5
+↓
+learns more sensor relationships
+Later training
+Epoch 20+
+↓
+training performance becomes very high
+
+But eventually:
+
+The student starts memorizing the training examples instead of improving general understanding.
+
+That's what increasing training accuracy + worsening validation loss can indicate.
+
+16. What is the learning rate?
+
+Your output contains:
+
+learning_rate: 0.0010
+
+This controls:
+
+How large a step the optimizer takes when updating the model's weights.
+
+Think of it like adjusting the model's knowledge.
+
+Too large
+↓
+may jump around and fail to settle
+
+Too small
+↓
+learning can become very slow
+
+Your starting learning rate is:
+
+0.001
+17. Why does learning rate change?
+
+Your output shows:
+
+learning_rate: 0.0010
+
+then later:
+
+learning_rate: 5.0000e-04
+
+and:
+
+learning_rate: 2.5000e-04
+
+For example, in the 30-second experiment:
+
+Epoch 24
+learning_rate = 0.0010
+
+Epoch 25
+learning_rate = 0.0005
+
+Epoch 28
+learning_rate = 0.00025
+
+This is caused by:
+
+ReduceLROnPlateau
+
+in your code.
+
+18. What does ReduceLROnPlateau do?
+
+It basically says:
+
+“The validation loss isn't improving enough. Let's reduce the learning rate and make smaller updates.”
+
+So:
+
+0.001
+ ↓
+0.0005
+ ↓
+0.00025
+
+This allows the model to make finer adjustments.
+
+It does not mean the model restarted training.
+
+It continues from the weights it already learned.
+
+19. What is EarlyStopping?
+
+Your project also has:
+
+EarlyStopping
+
+It watches:
+
+validation loss
+
+The idea is:
+
+If validation loss keeps failing to improve for a specified number of epochs, stop training and restore the best weights.
+
+Your terminal doesn't necessarily have to reach:
+
+Epoch 40
+
+because 40 is the maximum allowed, not a requirement.
+
+20. Why did 10-second training stop at Epoch 20?
+
+Your 10-second output ends at:
+
+Epoch 20/40
+
+and then immediately:
+
+Validation Macro F1: 0.750688
+Test Accuracy: 0.862508
+Test Macro F1: 0.749643
+
+So the model did not need all 40 epochs.
+
+Early stopping allowed the training process to stop once continued training was no longer providing useful validation improvement.
+
+21. Why did 20-second training stop at Epoch 23?
+
+Same idea.
+
+It ends at:
+
+Epoch 23/40
+
+then:
+
+Validation Macro F1: 0.751744
+Test Accuracy: 0.857529
+Test Macro F1: 0.752210
+
+Again:
+
+Maximum possible = 40 epochs
+Actual training    = 23 epochs
+
+because the callbacks decided there was no useful reason to continue.
+
+22. Why did 30-second training go to Epoch 28?
+
+For 30 seconds, validation performance improved for longer.
+
+The best validation loss was around:
+
+Epoch 21
+val_loss = 0.3971
+
+After that:
+
+Epoch 22 → 0.4014
+Epoch 23 → 0.4077
+Epoch 24 → 0.4119
+...
+Epoch 28 → 0.4290
+
+So the model continued for several epochs while the callbacks monitored the situation, eventually stopping at Epoch 28.
+
+23. Why does the terminal say Epoch 1/40?
+
+This is very important.
+
+It means:
+
+1 = current epoch
+40 = maximum epochs
+
+It does not mean:
+
+“The model will definitely train 40 times.”
+
+It means:
+
+“The model is allowed to train for up to 40 epochs.”
+
+Early stopping can finish earlier.
+
+24. Now compare all three experiments
+
+Your terminal gives:
+
+10 seconds
+Validation Macro F1 = 0.750688
+Test Accuracy       = 0.862508
+Test Macro F1       = 0.749643
+
+20 seconds
+Validation Macro F1 = 0.751744
+Test Accuracy       = 0.857529
+Test Macro F1       = 0.752210
+
+30 seconds
+Validation Macro F1 = 0.760501
+Test Accuracy       = 0.857920
+Test Macro F1       = 0.747814
+
+25. Why did the program choose 30 seconds?
+
+This is a very important point.
+
+The program selects the sequence length using:
+
+Validation Macro F1
+
+Compare:
+
+10 sec → 0.750688
+20 sec → 0.751744
+30 sec → 0.760501
+
+The highest is:
+
+30 seconds
+
+Therefore:
+
+SELECTED SEQUENCE LENGTH = 30 seconds
+
+Your terminal explicitly confirms this.
+
+26. Notice something interesting
+
+30 seconds did not have the highest Test Macro F1.
+
+You have:
+
+10 sec → 0.749643
+20 sec → 0.752210
+30 sec → 0.747814
+
+But the model still selects 30 seconds.
+
+Why?
+
+Because the selection rule is based on validation Macro F1, not test Macro F1.
+
+This is actually the correct experimental principle.
+
+The test set should be reserved for final evaluation rather than being used to choose the model.
+
+27. What does the final output mean?
+
+At the end:
+
+Selected sequence: 30 seconds
+Accuracy: 0.8579
+Macro Precision: 0.8292
+Macro Recall: 0.7190
+Macro F1: 0.7478
+
+So the final selected model:
+
+Input:
+30 consecutive time steps × 18 sensors
+
+Output:
+Normal / Fault 1–7
+
+and on the final test set:
+
+Accuracy = 85.79%
+Macro F1 = 74.78%
+28. One complete Epoch line decoded
+
+Take this:
+
+109/109 - 5s - 44ms/step - accuracy: 0.8590 - loss: 0.4152 - val_accuracy: 0.8504 - val_loss: 0.4318 - learning_rate: 0.0010
+
+It means:
+
+Output	Meaning
+109/109	109 training batches completed
+5s	Whole epoch took about 5 seconds
+44ms/step	Average time per batch
+accuracy: 0.8590	Training accuracy = 85.90%
+loss: 0.4152	Training cross-entropy loss
+val_accuracy: 0.8504	Validation accuracy = 85.04%
+val_loss: 0.4318	Validation cross-entropy loss
+learning_rate: 0.0010	Current optimizer learning rate
+
+That is the single most useful line to understand in the terminal.
+
+29. The whole training process visually
+
+Your model is doing this:
+
+                TRAINING DATA
+                     ↓
+               ┌───────────┐
+               │   LSTM    │
+               └─────┬─────┘
+                     ↓
+                Prediction
+                     ↓
+              Calculate LOSS
+                     ↓
+             Backpropagation
+                     ↓
+              Update weights
+                     ↓
+             Next batch
+                     ↓
+             Next epoch
+                     ↓
+            Repeat learning
+
+At the same time:
+
+             VALIDATION DATA
+                     ↓
+                LSTM model
+                     ↓
+               Prediction
+                     ↓
+             val_loss
+             val_accuracy
+
+The validation data does not update the model weights.
+
+It is used to monitor whether the learned model is generalizing.
+
+30. The most important relationship to remember
+Training loss:
+Should generally decrease
+Training accuracy:
+Should generally increase
+Validation loss:
+Ideally decreases initially
+then may flatten or increase
+Validation accuracy:
+Ideally increases initially
+then may flatten or decrease
+
+If:
+
+Training accuracy ↑↑
+Training loss ↓↓
+
+BUT
+
+Validation accuracy ↓
+Validation loss ↑
+
+then the model may be overfitting.
+
+Your 30-second experiment shows this behaviour toward the later epochs.
+
+31. What you should say to your guide
+
+If they point at:
+
+loss: 0.2742
+val_loss: 0.4195
+
+and ask “What is this?”, say:
+
+“Loss is the categorical cross-entropy error calculated on the training data. It measures how different the model's predicted class probabilities are from the actual class. Validation loss is the same error calculated on the separate validation data. We monitor validation loss to check whether the model is generalizing rather than only learning the training samples.”
+
+If they ask:
+
+“What is an epoch?”
+
+“One epoch is one complete pass through all training sequences.”
+
+“What is 110/110?”
+
+“The training data is divided into batches. 110/110 means all 110 batches for that epoch have been processed.”
+
+“Why 40 epochs?”
+
+“40 is the maximum number of epochs specified for training. Early stopping can terminate training earlier when validation performance stops improving.”
+
+“Why did learning rate become 0.0005?”
+
+“ReduceLROnPlateau automatically reduced the learning rate because validation loss stopped improving sufficiently, allowing the optimizer to make smaller weight updates.”
+
+“Why did you select 30 seconds?”
+
+“We tested 10, 20 and 30-second sequences and selected the sequence length with the highest validation Macro F1. The validation Macro F1 values were 0.750688, 0.751744 and 0.760501 respectively, so 30 seconds was selected.”
+
+The next thing we should understand is the actual train_one() function line by line, because that one function is exactly where epochs → batches → loss → validation loss → learning rate → early stopping → Macro F1 all come together.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Yes. Let us go through every output file from your current clean project, from the absolute basics, so that if your guide opens any file and asks “What is this? How did you get this number? Why is it there? What happens if the dataset changes?”, you can answer confidently.
+
+I’ll use the actual files and actual values from your uploaded project, not generic examples.
+
+1. First understand the whole flow
+
+Your project basically does this:
+
+MARINE ENGINE DATASET
+        ↓
+18 SENSOR PARAMETERS
+        ↓
+DATA PREPROCESSING
+        ↓
+TRAIN / VALIDATION / TEST SPLIT
+        ↓
+CREATE TIME WINDOWS
+        ↓
+LSTM MODEL
+        ↓
+PREDICT 8 CLASSES
+        ↓
+EVALUATE MODEL
+        ↓
+CREATE OUTPUT FILES
+
+The 8 classes are:
+
+0 → Normal
+1 → Fault 1
+2 → Fault 2
+3 → Fault 3
+4 → Fault 4
+5 → Fault 5
+6 → Fault 6
+7 → Fault 7
+
+Important: Fault 1–7 are the labels present in your dataset. Your project does not invent physical names for them.
+
+2. What are the output files?
+
+Your current project creates these main files:
+
+outputs/
+│
+├── classification_report.csv
+├── confusion_matrix.csv
+├── contributing_parameters.csv
+├── discovered_patterns.csv
+├── FAULT_CLASS_REFERENCE.csv
+└── FINAL_RESEARCH_REPORT.txt
+
+Think of them like different examination reports for the same model.
+
+File	Simple meaning
+classification_report.csv	How well the model classified each class
+confusion_matrix.csv	Where the model got confused
+contributing_parameters.csv	Which sensor values were different for Faults 4–7 compared with Normal
+discovered_patterns.csv	Behavioural patterns discovered inside Faults 1–3
+FAULT_CLASS_REFERENCE.csv	Combined readable reference of the fault classes/patterns
+FINAL_RESEARCH_REPORT.txt	Short final summary of the complete experiment
+
+Now let's understand each one deeply.
+
+3. classification_report.csv
+
+Your actual file contains:
+
+Normal    precision 0.8453   recall 0.9581   f1 0.8982   support 930
+Fault 1   precision 0.5000   recall 0.1447   f1 0.2245   support 76
+Fault 2   precision 0.7188   recall 0.2911   f1 0.4144   support 79
+Fault 3   precision 0.6981   recall 0.4933   f1 0.5781   support 75
+Fault 4   precision 1.0000   recall 1.0000   f1 1.0000   support 71
+Fault 5   precision 0.9767   recall 0.9333   f1 0.9545   support 90
+Fault 6   precision 0.8947   recall 0.9315   f1 0.9128   support 73
+Fault 7   precision 1.0000   recall 1.0000   f1 1.0000   support 77
+
+This file answers:
+
+"How good was the model at recognizing each class?"
+
+4. What is Precision?
+
+Let's take:
+
+Fault 5
+Precision = 0.9767
+
+That means:
+
+When the model said "This is Fault 5", approximately 97.67% of those predictions were actually Fault 5.
+
+Child-level example
+
+Imagine the model says:
+
+"I found 100 Fault 5 cases."
+
+If precision is approximately 97.7%:
+
+≈ 98 were actually Fault 5
+≈ 2 were something else
+
+So precision asks:
+
+"When the model predicts this class, how often is it correct?"
+
+Formula:
+
+Precision = Correct predictions of that class
+            --------------------------------
+            All predictions made as that class
+5. What is Recall?
+
+Take Fault 5 again:
+
+Recall = 0.9333
+
+Recall asks a different question:
+
+"Of all the actual Fault 5 cases, how many did the model successfully find?"
+
+Your test set had:
+
+Fault 5 support = 90
+
+The confusion matrix shows:
+
+Actual Fault 5:
+
+5 → 84
+
+So:
+
+84 / 90 = 0.9333
+
+Therefore:
+
+Recall = 93.33%
+Child example
+
+Suppose there are 100 hidden red balls.
+
+You find 93.
+
+Then:
+
+Recall = 93%
+
+You found most of the actual red balls.
+
+6. Precision vs Recall — VERY IMPORTANT FOR VIVA
+
+Remember this:
+
+Precision
+
+"When I say Fault 5, am I usually right?"
+
+Recall
+
+"Of all the real Fault 5 cases, how many did I find?"
+
+Easy memory trick:
+
+PRECISION → Prediction correctness
+
+RECALL → How many real cases I recalled/found
+7. What is F1-score?
+
+F1 combines:
+
+Precision
++
+Recall
+
+into one value.
+
+For Fault 5:
+
+Precision = 0.9767
+Recall    = 0.9333
+
+F1 = 0.9545
+
+It is the harmonic mean:
+
+F1 = 2 × Precision × Recall
+     ------------------------
+       Precision + Recall
+
+So F1 is useful when you don't want to look at precision and recall separately.
+
+8. What is Support?
+
+Example:
+
+Fault 5 support = 90
+
+Support simply means:
+
+How many actual Fault 5 samples existed in the test set.
+
+Your test set contains:
+
+Normal  = 930
+Fault 1 = 76
+Fault 2 = 79
+Fault 3 = 75
+Fault 4 = 71
+Fault 5 = 90
+Fault 6 = 73
+Fault 7 = 77
+
+Total:
+
+930 + 76 + 79 + 75 + 71 + 90 + 73 + 77
+= 1471
+
+That's why the report says:
+
+Test samples = 1471
+9. Why is Normal support so high?
+
+Because your test data contains many more Normal samples than some individual fault classes.
+
+That is also why accuracy alone isn't enough.
+
+For example, the model could become very good at Normal because there are many Normal examples while struggling with Fault 1.
+
+That's why your project also reports:
+
+Macro Precision = 0.8292
+Macro Recall    = 0.7190
+Macro F1        = 0.7478
+10. What is Macro Average?
+
+This is important.
+
+Macro average means:
+
+Calculate the metric separately for each class and then give every class equal importance.
+
+For example:
+
+Normal F1
+Fault 1 F1
+Fault 2 F1
+Fault 3 F1
+Fault 4 F1
+Fault 5 F1
+Fault 6 F1
+Fault 7 F1
+
+Then average those 8 values.
+
+This prevents the large Normal class from completely dominating the result.
+
+11. What is Weighted Average?
+
+Weighted average takes the number of samples into account.
+
+So:
+
+Normal has 930 samples
+Fault 1 has 76
+...
+
+Normal therefore contributes much more to the weighted result.
+
+That's why:
+
+Weighted F1 = 0.8355
+Macro F1    = 0.7478
+
+They answer slightly different questions.
+
+12. What does Accuracy = 0.8579 mean?
+
+Your final test accuracy:
+
+0.857920
+
+or:
+
+85.79%
+
+means approximately:
+
+Out of the 1471 test sequences, about 85.79% were classified correctly.
+
+From your confusion matrix, correct predictions are on the diagonal:
+
+891 + 11 + 23 + 37 + 71 + 84 + 68 + 77
+
+That gives:
+
+1262 correct
+
+And:
+
+1262 / 1471 ≈ 85.79%
+13. Now the MOST IMPORTANT file:
+confusion_matrix.csv
+
+Your actual matrix is:
+
+             Predicted
+             0   1   2   3   4   5   6   7
+
+Actual 0    891 11  8  14  0   1   5   0
+Actual 1     63 11  0   0  0   1   1   0
+Actual 2     54  0 23   0  0   0   2   0
+Actual 3     37  0  1  37  0   0   0   0
+Actual 4      0  0  0   0 71   0   0   0
+Actual 5      5  0  0   1  0  84   0   0
+Actual 6      4  0  0   1  0   0  68   0
+Actual 7      0  0  0   0  0   0   0  77
+
+This looks complicated but it is actually very simple.
+
+14. How to read the confusion matrix
+
+Always remember:
+
+ROWS    = ACTUAL
+COLUMNS = PREDICTED
+
+For example:
+
+Actual_5
+
+means:
+
+The real answer was Fault 5.
+
+Then:
+
+Pred_5 = 84
+
+means:
+
+The model correctly predicted 84 of those as Fault 5.
+
+15. Why is the diagonal important?
+
+Look at:
+
+Actual_5 → Pred_5 = 84
+
+This is correct.
+
+Look at:
+
+Actual_5 → Pred_1 = 0
+
+That means none of those actual Fault 5 samples were predicted as Fault 1.
+
+Correct predictions appear on the diagonal:
+
+891
+11
+23
+37
+71
+84
+68
+77
+
+So:
+
+Diagonal = correct predictions
+
+Everything outside the diagonal:
+
+Wrong predictions
+
+16. Example: Fault 1
+
+Look at:
+
+Actual_1:
+63  11  0  0  0  1  1  0
+
+There were:
+
+76 actual Fault 1 samples
+
+The model predicted:
+
+63 → Normal
+11 → Fault 1
+1  → Fault 5
+1  → Fault 6
+
+So only:
+
+11 / 76
+
+were correctly classified as Fault 1.
+
+That's why Fault 1 recall is low:
+
+Recall = 11 / 76
+       ≈ 14.47%
+17. This tells us something useful
+
+The model has difficulty separating Fault 1 from Normal.
+
+Because:
+
+Actual Fault 1
+        ↓
+63 predicted as Normal
+
+That's a very useful observation for your guide.
+
+You can say:
+
+"The confusion matrix shows that many Fault 1 samples were classified as Normal, indicating that Fault 1 has behavioural characteristics that overlap with the normal operating data in the learned representation."
+
+Don't say:
+
+"Fault 1 physically looks like Normal."
+
+That would be an unsupported physical conclusion.
+
+18. Fault 4
+
+Look at:
+
+Actual_4:
+
+0 0 0 0 71 0 0 0
+
+All 71 were correctly predicted as Fault 4.
+
+Therefore:
+
+Precision = 100%
+Recall    = 100%
+F1        = 100%
+19. Fault 7
+
+Same:
+
+Actual_7:
+
+0 0 0 0 0 0 0 77
+
+All 77 were correctly classified.
+
+Therefore:
+
+Precision = 1
+Recall = 1
+F1 = 1
+20. What happens if we change the dataset?
+
+This is an extremely important question.
+
+YES.
+
+If you change the dataset, the output files can change.
+
+For example, if you:
+
+add rows
+remove rows
+change sensor values
+change fault labels
+change the distribution of Normal/Fault samples
+
+then the model is being trained/evaluated on different data.
+
+Therefore these can change:
+
+classification_report.csv
+confusion_matrix.csv
+contributing_parameters.csv
+discovered_patterns.csv
+FAULT_CLASS_REFERENCE.csv
+FINAL_RESEARCH_REPORT.txt
+
+And even:
+
+selected sequence length
+training epochs
+validation loss
+test accuracy
+precision
+recall
+F1
+patterns
+median values
+
+can change.
+
+21. Now your BIG question:
+"Fault 4–7 Normal Median — what is that?"
+
+This is important.
+
+Your contributing_parameters.csv contains:
+
+Fault
+Rank
+Sensor
+Normal_Median
+Fault_Median
+Percent_Change_vs_Normal
+
+For example:
+
+Fault 4
+Rank 1
+Vibration_Y
+Normal Median = 0.049652
+Fault Median  = 0.345296
+Percent Change = +595.43%
+
+What does that mean?
+
+22. What is a median?
+
+Imagine these five values:
+
+1
+2
+3
+4
+100
+
+The average is:
+
+(1+2+3+4+100)/5 = 22
+
+But 22 doesn't represent the typical values very well because 100 is an extreme value.
+
+The median is:
+
+1 2 3 4 100
+    ↑
+    3
+
+So:
+
+Median = 3
+
+The median is basically:
+
+The middle value after sorting the values.
+
+23. Why does your project use median?
+
+Because sensor data can contain extreme values/outliers.
+
+Median is more robust than mean against extreme values.
+
+So instead of saying:
+
+"What is the average vibration?"
+
+your analysis asks:
+
+"What is the typical middle vibration value?"
+
+for:
+
+Normal samples
+
+and separately:
+
+Fault samples
+24. Where does Normal Median come from?
+
+This is NOT manually entered.
+
+It comes from your dataset.
+
+Suppose the dataset contains Normal samples:
+
+Vibration_Y
+
+0.04
+0.05
+0.06
+0.05
+0.04
+0.07
+...
+
+The code takes the Normal rows and calculates:
+
+median(Vibration_Y)
+
+Your result was:
+
+Normal Median = 0.049652...
+
+So the number is data-derived.
+
+25. Where does Fault Median come from?
+
+Same process.
+
+For Fault 4:
+
+take all Fault 4 samples
+        ↓
+take Vibration_Y values
+        ↓
+calculate median
+        ↓
+0.345296...
+
+Therefore:
+
+Normal Median
+=
+median of Vibration_Y for Normal class
+
+Fault Median
+=
+median of Vibration_Y for Fault 4
+26. Is this median referred from somewhere?
+
+No, not as a predefined engineering threshold.
+
+This distinction is VERY important.
+
+The value:
+
+0.049652
+
+is not:
+
+"The official normal vibration limit."
+
+And:
+
+0.345296
+
+is not:
+
+"The official Fault 4 vibration limit."
+
+They are simply:
+
+Median values calculated from your supplied dataset.
+
+So if your guide asks:
+
+"Where did 0.049652 come from?"
+
+Say:
+
+"It was calculated from the median of the Vibration_Y values belonging to the Normal class in the supplied dataset. It is a data-derived reference value, not a manually defined engineering threshold."
+
+Excellent viva answer.
+
+27. How is Percent Change calculated?
+
+Your file says:
+
+Fault 4
+Vibration_Y
+
+Normal Median = 0.049652
+Fault Median = 0.345296
+
+Percent Change = +595.432%
+
+Formula:
+
+Percent Change =
+(Fault Median - Normal Median)
+-------------------------------- × 100
+       Normal Median
+
+Let's substitute:
+
+(0.345296 - 0.049652)
+---------------------- × 100
+       0.049652
+
+≈
+
+595.43%
+
+So the fault median is approximately 595% higher relative to the normal median.
+
+28. Does +595% mean vibration increased by exactly 595 physical units?
+
+NO.
+
+This is another important distinction.
+
+It means:
+
+The Fault 4 median is approximately 595% higher than the Normal median relative to the Normal median.
+
+The actual values are:
+
+Normal = 0.049652
+Fault  = 0.345296
+
+The actual difference is:
+
+0.345296 - 0.049652
+≈ 0.295644
+
+The percentage simply expresses that difference relative to the normal reference.
+
+29. What about negative percentage?
+
+Example:
+
+Fault 5
+Oil_Pressure
+
+Normal Median = 3.493
+Fault Median  = 1.979
+
+Percent Change = -43.35%
+
+That means:
+
+The median Oil_Pressure in Fault 5 samples is approximately 43.35% lower than the Normal median.
+
+Again, this is descriptive data analysis.
+
+It does NOT automatically prove:
+
+"Low oil pressure causes Fault 5."
+
+30. Why are Faults 4–7 analyzed using this?
+
+Your project uses two different post-analysis approaches.
+
+Faults 1–3
+
+Use:
+
+LSTM representation
+       ↓
+clustering
+       ↓
+behavioural patterns
+Faults 4–7
+
+Use:
+
+Fault samples
+      ↓
+compare sensor medians with Normal
+      ↓
+rank differences
+
+So the methodology is different.
+
+31. What does Rank mean?
+
+For Fault 4:
+
+Rank 1 → Vibration_Y
+Rank 2 → Vibration_X
+Rank 3 → Ambient_Temp
+...
+
+Rank 1 means:
+
+This parameter showed the largest absolute percentage difference from the Normal median among the parameters considered.
+
+It does not mean:
+
+"Vibration_Y is scientifically proven to cause Fault 4."
+
+That's why your file explicitly calls it a:
+
+descriptive data-derived association
+
+32. What happens to these medians if dataset changes?
+
+Absolutely yes.
+
+Suppose currently:
+
+Normal Vibration_Y:
+0.04
+0.05
+0.05
+0.06
+0.04
+
+Median might be:
+
+0.05
+
+Now suppose you add many new Normal observations:
+
+0.10
+0.11
+0.12
+...
+
+The Normal median may increase.
+
+Therefore:
+
+Normal_Median changes
+
+Then:
+
+Percent_Change_vs_Normal
+
+also changes.
+
+And the ranking can change.
+
+For example:
+
+Current:
+
+1. Vibration_Y
+2. Vibration_X
+3. Ambient_Temp
+
+After changing the dataset, it could theoretically become:
+
+1. Vibration_X
+2. Oil_Pressure
+3. Vibration_Y
+
+because the ranking is calculated from the data.
+
+33. Is Normal Median calculated from the training data only?
+
+This is an important implementation-specific question.
+
+For your current clean project's post-analysis, these contributing-parameter statistics are generated from the available class-labelled data used by the analysis, rather than being an external engineering reference.
+
+So when explaining the result, say:
+
+"The median values are calculated from the dataset according to class labels. They are not externally supplied thresholds."
+
+If your guide asks specifically whether those statistics are training-only or test-only, we should check the exact train_final.py implementation before answering that detail. I would not invent an answer there.
+
+34. Now discovered_patterns.csv
+
+This file is different.
+
+It contains patterns for:
+
+Fault 1
+Fault 2
+Fault 3
+
+For example:
+
+Fault 1
+Pattern 1
+Samples = 48
+
+and:
+
+Fault 1
+Pattern 2
+Samples = 28
+
+Total:
+
+48 + 28 = 76
+
+which matches the number of Fault 1 test samples.
+
+35. What is a behavioural pattern?
+
+Very simply:
+
+Suppose two groups of Fault 1 samples behave differently.
+
+Group A:
+
+Fuel Flow ↓
+Vibration_X ↑
+Oil Pressure ↓
+
+Group B:
+
+Fuel Flow ↓
+Cylinder2 Pressure ↓
+Vibration_Z ↓
+
+The model's learned representation can contain different regions corresponding to these behaviours.
+
+The project uses clustering to identify such groups.
+
+We call them:
+
+Behavioural patterns
+
+not physical fault subtypes.
+
+36. Why don't we call Pattern 1 "Fault Type A"?
+
+Because we don't have authoritative evidence that the dataset's Fault 1 actually represents two different physical failures.
+
+The clustering only tells us:
+
+"There appear to be two groups of Fault 1 samples with different learned sensor behaviour."
+
+It does NOT prove:
+
+"There are two physical mechanisms causing Fault 1."
+
+That's why your output deliberately says:
+
+not a proven physical fault subtype
+or causal root cause
+37. What is Samples in discovered_patterns?
+
+Example:
+
+Fault 1
+Pattern 1
+Samples = 48
+
+It means:
+
+48 samples were assigned to that behavioural cluster.
+
+Pattern 2:
+
+28 samples
+
+Therefore:
+
+48 + 28 = 76
+38. What is Silhouette?
+
+Your file has:
+
+Silhouette = 0.161357
+
+This measures how well the clusters are separated.
+
+Very simply:
+
+Are samples inside the same cluster relatively similar?
+AND
+Are different clusters reasonably separated?
+
+A higher silhouette generally means cleaner separation.
+
+Your values are around:
+
+0.15–0.16
+
+So you should not oversell the clustering.
+
+Say:
+
+"The clustering is exploratory and shows behavioural grouping, but the relatively modest silhouette values mean the separation between groups is limited."
+
+That's a scientifically honest explanation.
+
+39. What are Top_Parameters?
+
+Example:
+
+Fault 1 Pattern 1
+
+Fuel_Flow,
+Vibration_X,
+Oil_Pressure,
+Ambient_Temp,
+Cylinder3_Exhaust_Temp
+
+These are the sensor parameters showing the strongest differences associated with that cluster's behaviour.
+
+Again:
+
+association ≠ causation
+40. What does Pattern Description mean?
+
+Example:
+
+Fuel_Flow (lower, -21.9%)
+Vibration_X (higher, +18.1%)
+Oil_Pressure (lower, -4.4%)
+...
+
+It describes how those sensor values differ relative to the relevant normal/reference profile.
+
+So:
+
+lower -21.9%
+
+means that parameter's observed central tendency in that pattern was lower relative to the reference.
+
+It is a descriptive comparison, not an engineering alarm threshold.
+
+41. FAULT_CLASS_REFERENCE.csv
+
+This is basically your organized reference table.
+
+It combines:
+
+Fault class
++
+behavioural patterns
++
+contributing parameters
++
+observed changes
++
+interpretation
++
+physical classification status
+
+Think of it as your:
+
+"What did our analysis discover about each class?"
+
+file.
+
+42. Why was this file created?
+
+Instead of making your guide open:
+
+classification_report.csv
+confusion_matrix.csv
+discovered_patterns.csv
+contributing_parameters.csv
+
+and connect everything manually, this file gives a consolidated fault reference.
+
+For example:
+
+Fault 1
+→ 2 behavioural patterns
+
+Fault 2
+→ 3 behavioural patterns
+
+Fault 3
+→ 2 behavioural patterns
+
+Fault 4
+→ contributing parameters
+
+...
+43. Fault 0 in this file
+
+It says:
+
+Fault 0
+Baseline / normal reference
+
+That's because Fault 0 is:
+
+Normal
+
+It is used as the baseline/reference when comparing the fault classes.
+
+44. Why is Normal used as the reference?
+
+Because we want to answer:
+
+"How does this fault-class behaviour differ from normal operating behaviour?"
+
+For example:
+
+Normal Oil Pressure = 3.493
+Fault 5 Oil Pressure = 1.979
+
+Then we can describe the difference.
+
+Without a normal reference, it is harder to explain whether a sensor value is relatively high or low.
+
+45. FINAL_RESEARCH_REPORT.txt
+
+This is your summary document.
+
+It contains:
+
+MODEL
+FINAL TEST METRICS
+FAULT CLASS REFERENCE
+PATTERN ANALYSIS
+FAULT OCCURRENCES
+LIMITATIONS
+
+It does not contain every individual prediction.
+
+It gives the important final conclusions.
+
+46. Model section
+
+It says:
+
+Single 8-class LSTM using 18 raw sensor parameters.
+Sequence lengths tested: [10, 20, 30].
+Selected sequence length: 30 seconds.
+Manual fault signatures: NONE.
+Class weights: NONE.
+
+This answers:
+
+"What model did you build?"
+
+Answer:
+
+"We built a single 8-class LSTM using 18 sensor parameters. We experimentally evaluated 10-, 20-, and 30-second temporal sequences and selected the 30-second sequence based on validation Macro F1."
+
+47. Why does it say Manual fault signatures: NONE?
+
+Because you didn't manually tell the model:
+
+if oil pressure < X
+and vibration > Y
+then Fault 5
+
+Instead:
+
+sensor data
+ ↓
+LSTM
+ ↓
+learned temporal patterns
+ ↓
+classification
+
+So the model learned from the labelled dataset.
+
+48. Why does it say Class weights: NONE?
+
+Class weights are sometimes used when classes are highly imbalanced.
+
+For example:
+
+Normal = 10,000
+Fault 1 = 50
+
+You could give Fault 1 a larger training weight.
+
+Your current project does not do that.
+
+So:
+
+Class weights = NONE
+
+means every training sample is handled without manually increasing/decreasing its class contribution.
+
+49. Final Test Metrics
+
+Your report:
+
+Accuracy       = 0.857920
+Macro Precision= 0.829212
+Macro Recall   = 0.719014
+Macro F1       = 0.747814
+Test samples   = 1471
+
+These come from the test predictions.
+
+The test data is used at the end to evaluate how the trained model performs on unseen test sequences.
+
+50. Very important: Why is Macro F1 lower than Accuracy?
+
+Your accuracy is:
+
+85.79%
+
+but Macro F1:
+
+74.78%
+
+Why?
+
+Because the model performs very differently across classes.
+
+Look:
+
+Normal F1 = 89.82%
+Fault 1   = 22.45%
+Fault 2   = 41.44%
+Fault 3   = 57.81%
+Fault 4   = 100%
+Fault 5   = 95.45%
+Fault 6   = 91.28%
+Fault 7   = 100%
+
+Some classes are very strong.
+
+Some are much weaker.
+
+Macro F1 gives each class equal importance.
+
+Therefore Fault 1, Fault 2 and Fault 3 reduce the macro score considerably.
+
+51. Fault Occurrences
+
+Your final report says:
+
+Occurrences are contiguous runs of the same predicted fault label in timestamp-level test predictions.
+
+This means the project looks at consecutive predictions.
+
+Example:
+
+Time 1 → Fault 5
+Time 2 → Fault 5
+Time 3 → Fault 5
+Time 4 → Fault 5
+
+That is treated as one occurrence/run.
+
+Instead of:
+
+Fault 5
+Fault 5
+Fault 5
+Fault 5
+
+being counted as four separate events.
+
+52. Is that a physical failure event?
+
+No.
+
+This is VERY important.
+
+The report specifically says it is:
+
+not a physical-event benchmark because the dataset does not provide physical event IDs.
+
+So:
+
+contiguous predicted Fault 5
+
+doesn't necessarily mean:
+
+"The engine physically experienced one continuous Fault 5 event."
+
+It means:
+
+"The model continuously predicted Fault 5 over those consecutive timestamps."
+
+53. Limitations section
+
+Your report says:
+
+Dataset-specific evaluation
+External-engine validation is not included.
+Overlapping temporal windows are not statistically independent.
+Sensor associations do not establish physical causality.
+
+These are actually important research points.
+
+54. What does dataset-specific evaluation mean?
+
+Your model was tested on this dataset.
+
+Therefore we can say:
+
+"The model performs this way on this dataset."
+
+We should not automatically say:
+
+"The model will achieve 85.79% on every marine engine."
+
+That would be too strong.
+
+55. What does overlapping windows mean?
+
+Suppose sequence length = 30.
+
+You might have:
+
+Window 1:
+1–30
+
+Window 2:
+2–31
+
+Window 3:
+3–32
+
+These windows share most of their data.
+
+So they are not completely independent samples.
+
+That's why your report explicitly mentions this limitation.
+
+56. "Sensor associations do not establish physical causality"
+
+This is one of the most important lines for your viva.
+
+Suppose we find:
+
+Fault 7
+Vibration_Z +682%
+
+We can say:
+
+"Vibration_Z showed a strong data-derived association with Fault 7."
+
+We cannot automatically say:
+
+"High Vibration_Z causes Fault 7."
+
+Because correlation/association does not prove cause.
+
+57. Now answer your dataset-change question completely
+
+Suppose you change:
+
+marine_engine_fault_dataset.csv
+
+Then the whole pipeline can change.
+
+If you add more rows:
+Number of samples changes
+↓
+train/validation/test sizes change
+↓
+number of sequences changes
+↓
+model training changes
+↓
+predictions change
+↓
+classification report changes
+↓
+confusion matrix changes
+↓
+medians change
+↓
+patterns may change
+↓
+final report changes
+58. If you change only sensor values
+
+For example:
+
+Vibration_Y
+
+changes.
+
+Then:
+
+LSTM input changes
+↓
+learned patterns may change
+↓
+predictions may change
+↓
+confusion matrix may change
+
+And the contributing-parameter analysis can also change:
+
+Normal Median
+Fault Median
+Percent Change
+Rank
+59. If you change only labels
+
+For example:
+
+some row:
+Fault 5
+
+becomes:
+
+Fault 6
+
+Then the model's target changes.
+
+That can affect:
+
+training
+validation
+test performance
+classification report
+confusion matrix
+patterns
+fault statistics
+
+because the meaning of the training target has changed.
+
+60. If you add a new fault class
+
+Suppose you introduce:
+
+Fault 8
+
+Your current model is designed for:
+
+8 classes = 0–7
+
+So you cannot simply add Fault 8 and expect the current model to automatically understand it.
+
+The output layer is:
+
+Dense(8, activation='softmax')
+
+meaning:
+
+8 possible outputs
+
+You would need to modify the pipeline/model for 9 classes and retrain.
+
+61. If you change the dataset, should old results still be used?
+
+No.
+
+If the dataset changes significantly, you should rerun the pipeline.
+
+The old:
+
+classification_report.csv
+confusion_matrix.csv
+
+describe the old run.
+
+They are not automatically valid for the new dataset.
+
+62. One very important distinction: model output vs analysis output
+
+Your project has two types of outputs.
+
+Model evaluation outputs
+classification_report.csv
+confusion_matrix.csv
+
+These answer:
+
+"How well did the model classify?"
+
+Interpretation/analysis outputs
+contributing_parameters.csv
+discovered_patterns.csv
+FAULT_CLASS_REFERENCE.csv
+
+These answer:
+
+"What behavioural characteristics can we describe from the data?"
+
+Summary
+FINAL_RESEARCH_REPORT.txt
+
+answers:
+
+"What were the final results and limitations?"
+
+63. The easiest way to explain the entire output folder to your guide
+
+You can literally say:
+
+"The output folder contains six main files. The classification report gives class-wise precision, recall, F1-score and support. The confusion matrix shows actual versus predicted classes and helps identify where the model is making mistakes. The contributing parameters file compares the median sensor values of Faults 4–7 against the Normal class and ranks the largest data-derived differences. The discovered patterns file uses clustering of the LSTM learned representations to describe behavioural patterns within Faults 1–3. The fault class reference combines these findings into one structured reference table. Finally, the research report summarizes the model configuration, final test metrics, fault analysis and limitations."
+
+That is a very strong overview answer.
+
+64. One more question your guide may definitely ask
+"Where did the Normal Median come from?"
+
+Answer:
+
+"It is calculated directly from the sensor values belonging to the Normal class in the dataset. It is the statistical median, so it represents the middle value of that sensor distribution. It is not an externally defined engineering threshold."
+
+"Where did Fault Median come from?"
+
+"It is calculated in the same way, but using the sensor values belonging to the particular fault class."
+
+"If the dataset changes?"
+
+"The medians and percentage differences are recalculated, so the output can change."
+
+"Does it prove the sensor causes the fault?"
+
+"No. It is a data-derived association and does not establish physical causality."
+
+65. One more question: "Why median and not average?"
+
+Answer:
+
+"Median is less sensitive to extreme values and outliers. Since sensor datasets can contain unusually high or low observations, median provides a more robust description of the typical value."
+
+66. "Why did you compare with Normal?"
+
+Answer:
+
+"Normal operation provides a baseline. By comparing each fault class with the Normal class, we can describe which sensor parameters tend to be higher or lower under the fault-labelled data."
+
+67. "Are these engineering thresholds?"
+
+Answer:
+
+"No. They are data-derived statistical reference values, not manually defined engineering thresholds."
+
+This sentence is worth remembering exactly.
+
+68. "Why are Fault 4 and Fault 7 showing 100%?"
+
+Based on your confusion matrix:
+
+Fault 4:
+71 → Fault 4
+0 → other classes
+
+Fault 7:
+77 → Fault 7
+0 → other classes
+
+Therefore:
+
+Precision = 1
+Recall = 1
+F1 = 1
+
+on this particular test set.
+
+Don't say:
+
+"The model will always identify Fault 4 and Fault 7 perfectly."
+
+Say:
+
+"On this test set, all evaluated Fault 4 and Fault 7 samples were correctly classified."
+
+69. "Why is Fault 1 poor?"
+
+The confusion matrix gives the direct evidence:
+
+Actual Fault 1:
+
+63 → Normal
+11 → Fault 1
+1  → Fault 5
+1  → Fault 6
+
+So the majority were classified as Normal.
+
+That's why:
+
+Fault 1 recall = 14.47%
+
+This is not something we need to guess—the confusion matrix directly shows it.
+
+70. "Why is Fault 2 recall only 29.11%?"
+
+Actual Fault 2:
+
+54 → Normal
+23 → Fault 2
+2  → Fault 6
+
+Therefore only:
+
+23 / 79
+
+were correctly identified as Fault 2.
+
+So:
+
+Recall = 29.11%
+
+Again, the confusion matrix explains the classification report.
+
+71. The connection between the two files
+
+This is important:
+
+confusion_matrix.csv
+          ↓
+explains
+          ↓
+classification_report.csv
+
+For example:
+
+Fault 5:
+Actual = 90
+Correct = 84
+
+From this:
+
+Recall = 84/90
+       = 93.33%
+
+So the classification report isn't some mysterious separate calculation.
+
+It is derived from the model's actual predictions.
+
+72. The complete relationship of your output files
+
+Think of it like this:
+
+                    DATASET
+                       │
+                       ▼
+                     LSTM
+                       │
+                       ▼
+             ACTUAL vs PREDICTED
+                  /          \
+                 /            \
+                ▼              ▼
+       CONFUSION MATRIX    CLASSIFICATION
+                              REPORT
+                │
+                │
+                ▼
+       Understand mistakes
+       
+       
+       LSTM LEARNED REPRESENTATION
+                  │
+                  ▼
+          FAULT 1–3 CLUSTERING
+                  │
+                  ▼
+       discovered_patterns.csv
+       
+       
+       ORIGINAL SENSOR DATA
+                  │
+                  ▼
+        NORMAL vs FAULT MEDIANS
+                  │
+                  ▼
+      contributing_parameters.csv
+                  │
+                  ▼
+       FAULT_CLASS_REFERENCE.csv
+       
+       
+       ALL RESULTS
+           │
+           ▼
+ FINAL_RESEARCH_REPORT.txt
+
+That is the overall architecture of your output analysis.
+
+73. Final cheat sheet for your viva
+If guide asks...	Say...
+What is classification report?	Class-wise evaluation of the model
+Precision?	Of predictions made as a class, how many were correct
+Recall?	Of actual samples of a class, how many were found
+F1?	Harmonic mean of precision and recall
+Support?	Number of actual test samples in that class
+Confusion matrix?	Table showing actual classes versus predicted classes
+Rows?	Actual classes
+Columns?	Predicted classes
+Diagonal?	Correct predictions
+Off-diagonal?	Misclassifications
+What is median?	Middle value after sorting observations
+Why median?	More robust to extreme values
+Where does Normal Median come from?	Calculated from Normal-class sensor values in the dataset
+Where does Fault Median come from?	Calculated from the corresponding fault-class sensor values
+Is median an engineering threshold?	No, it is a data-derived statistical reference
+Does dataset change affect median?	Yes
+Does dataset change affect model results?	Yes, potentially all results
+What is percentage change?	Relative difference between fault median and normal median
+What are contributing parameters?	Sensors showing the largest data-derived differences from Normal
+Do they prove causation?	No
+What are discovered patterns?	Behavioural groups found using clustering of learned LSTM representations
+Are they physical fault subtypes?	No, they are exploratory behavioural patterns
+What is silhouette?	A measure of how separated the clusters are
+Why use Normal as baseline?	To describe how fault-labelled data differs from normal operation
+What is fault occurrence?	A contiguous run of the same predicted fault label
+Is it a physical failure event?	No, not without physical event IDs
+Why 85.79% accuracy?	1262 of 1471 test sequences were correctly classified
+Why macro F1 only 74.78%?	Performance varies substantially across classes, especially Faults 1–3
+The single most important thing to remember
+
+Your project has two separate ideas:
+
+The LSTM performs classification.
+
+and
+
+The statistical/clustering analysis explains the observed behaviour in the data.
+
+The second part does not magically prove physical causes. That distinction will make your explanation much more technically correct.
+
+If your guide asks about any exact number in these files, the safest approach is to trace it back to the underlying dataset calculation or model predictions, rather than saying it was a predefined value.
